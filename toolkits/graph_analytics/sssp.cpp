@@ -269,7 +269,7 @@ int main(int argc, char** argv) {
 
   std::clock_t end_load = std::clock();
   double load_elapsed_secs = double(end_load - begin_load) / CLOCKS_PER_SEC;
-
+  std::cout << "Load: " << load_elapsed_secs << " seconds." << std::endl;
 
   if(sources.empty()) {
     if (max_degree_source == false) {
