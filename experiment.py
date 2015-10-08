@@ -17,7 +17,7 @@ graph_path = '%s/graphs/livejournal/' % home_path
 
 hostfile_path = '%s/machines' % home_path
 
-for run in range(1):  # Do experiment X many times
+for run in range(3):  # Do experiment X many times
     for num_iteration in num_iterations:
         lines = subprocess.check_output(['shuf', '-n', str(num_iteration), '%s/lab_data_lj' % home_path])
         lines = lines.split('\n')
