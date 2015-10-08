@@ -4,7 +4,7 @@ from subprocess import STDOUT, check_call
 import os
 import subprocess
 
-num_hosts = 3
+num_hosts = 16
 home_path = '/home/yosub_shin_0'
 power_graph_home = '%s/PowerGraph' % home_path
 graph_analytics_bin_path = '%s/release/toolkits/graph_analytics' % power_graph_home
