@@ -247,6 +247,7 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
+  std::clock_t begin_load = std::clock();
 
   // Build the graph ----------------------------------------------------------
   graph_type graph(dc, clopts);
@@ -266,6 +267,8 @@ int main(int argc, char** argv) {
   dc.cout() << "#vertices:  " << graph.num_vertices() << std::endl
             << "#edges:     " << graph.num_edges() << std::endl;
 
+  std::clock_t end_load = std::clock();
+  double load_elapsed_secs = double(end_load - begin_load) / CLOCKS_PER_SEC;
 
 
   if(sources.empty()) {
@@ -313,6 +316,22 @@ int main(int argc, char** argv) {
 
   // Tear-down communication layer and quit -----------------------------------
   graphlab::mpi_tools::finalize();
+
+  const std::string output_filename = "/home/yosub_shin_0/output.csv";
+  std::ofstream ofs;
+  ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
+  if (!ofs.is_open()) {
+    std::cout << "Failed to open output file.\n";
+    return EXIT_FAILURE;
+  }
+  std::string ingress_method = "";
+  clopts.get_graph_args().get_option("ingress", ingress_method);
+
+  // algorithm, partitioning_strategy, num_iterations, loading_time, partitioning_time, computation_time, total_time
+  ofs << "sssp," << ingress_method << "," << sources.size() << "," << load_elapsed_secs << ",0," << runtime << "," << (load_elapsed_secs + runtime) << std::endl;
+
+  ofs.close();
+
   return EXIT_SUCCESS;
 } // End of main
 
