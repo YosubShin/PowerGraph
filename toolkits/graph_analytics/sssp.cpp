@@ -23,7 +23,6 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <ctime>
 
 #include <graphlab.hpp>
 
@@ -247,7 +246,7 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  std::clock_t begin_load = std::clock();
+  graphlab::timer load_timer;
 
   // Build the graph ----------------------------------------------------------
   graph_type graph(dc, clopts);
@@ -267,8 +266,7 @@ int main(int argc, char** argv) {
   dc.cout() << "#vertices:  " << graph.num_vertices() << std::endl
             << "#edges:     " << graph.num_edges() << std::endl;
 
-  std::clock_t end_load = std::clock();
-  double load_elapsed_secs = double(end_load - begin_load) / CLOCKS_PER_SEC;
+  double load_elapsed_secs = load_timer.current_time();
   std::cout << "Load: " << load_elapsed_secs << " seconds." << std::endl;
 
   if(sources.empty()) {
