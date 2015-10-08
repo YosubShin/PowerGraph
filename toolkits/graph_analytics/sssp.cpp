@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <chrono>
 
 
 #include <graphlab.hpp>
@@ -247,7 +248,8 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  std::clock_t begin_load = std::clock();
+//  std::clock_t begin_load = std::clock();
+  auto begin_load = std::chrono::steady_clock::now();
 
   // Build the graph ----------------------------------------------------------
   graph_type graph(dc, clopts);
@@ -267,8 +269,12 @@ int main(int argc, char** argv) {
   dc.cout() << "#vertices:  " << graph.num_vertices() << std::endl
             << "#edges:     " << graph.num_edges() << std::endl;
 
-  std::clock_t end_load = std::clock();
-  double load_elapsed_secs = double(end_load - begin_load) / CLOCKS_PER_SEC;
+//  std::clock_t end_load = std::clock();
+  auto end_load = std::chrono::steady_clock::now();
+
+  int load_elapsed_secs = (int) std::chrono::duration_cast<std::chrono::seconds>(end_load - begin_load).count();
+//  double load_elapsed_secs = double(end_load - begin_load) / CLOCKS_PER_SEC;
+//  double load_elapsed_secs = double(end_load - begin_load) / CLOCKS_PER_SEC;
   std::cout << "Load: " << load_elapsed_secs << " seconds." << std::endl;
 
   if(sources.empty()) {
