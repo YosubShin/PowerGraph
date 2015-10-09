@@ -13,7 +13,7 @@ num_iterations = [5, 10, 20]
 # algorithms = ['pagerank']
 algorithms = ['sssp']
 
-partitioning_strategies = ['grid', random', 'oblivious']
+partitioning_strategies = ['grid', 'random', 'oblivious']
 graph_path = '%s/graphs/livejournal/' % home_path
 
 hostfile_path = '%s/machines' % home_path
