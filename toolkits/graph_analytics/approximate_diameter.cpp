@@ -306,11 +306,16 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
+  graphlab::timer load_timer;
+
   //load graph
   graph_type graph(dc, clopts);
   dc.cout() << "Loading graph in format: "<< format << std::endl;
   graph.load_format(graph_dir, format);
   graph.finalize();
+
+  double load_elapsed_secs = load_timer.current_time();
+  std::cout << "Load: " << load_elapsed_secs << " seconds." << std::endl;
 
   time_t start, end;
   //initialize vertices
@@ -350,10 +355,30 @@ int main(int argc, char** argv) {
   }
   time(&end);
 
+  const float runtime = (end - start);
+
   dc.cout() << "graph calculation time is " << (end - start) << " sec\n";
   dc.cout() << "The approximate diameter is " << diameter << "\n";
 
   graphlab::mpi_tools::finalize();
+
+  const std::string output_filename = "/home/yosub_shin_0/output.csv";
+  std::ofstream ofs;
+  ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
+  if (!ofs.is_open()) {
+    std::cout << "Failed to open output file.\n";
+    return EXIT_FAILURE;
+  }
+  std::string ingress_method = "";
+  clopts.get_graph_args().get_option("ingress", ingress_method);
+
+  double tolerance = 0.0;
+  clopts.get_graph_args().get_option("tol", tolerance);
+
+  // algorithm, partitioning_strategy, num_iterations, loading_time, partitioning_time, computation_time, total_time
+  ofs << "sssp," << ingress_method << "," << tolerance << "," << load_elapsed_secs << ",0," << runtime << "," << (load_elapsed_secs + runtime) << std::endl;
+
+  ofs.close();
 
   return EXIT_SUCCESS;
 }
