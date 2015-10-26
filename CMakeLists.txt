@@ -68,7 +68,7 @@ endif()
 
 
 # Shared compiler flags used by all builds (debug, profile, release)
-set(COMPILER_FLAGS "-Wall -g ${CPP11_FLAGS} ${OPENMP_C_FLAGS}" CACHE STRING "common compiler options")
+set(COMPILER_FLAGS "-g ${CPP11_FLAGS} ${OPENMP_C_FLAGS}" CACHE STRING "common compiler options")
 
 # Disable address space randomization for OSX lion and above
 if (APPLE)
