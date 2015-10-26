@@ -376,7 +376,7 @@ int main(int argc, char** argv) {
   clopts.get_graph_args().get_option("tol", tolerance);
 
   // algorithm, partitioning_strategy, num_iterations, loading_time, partitioning_time, computation_time, total_time
-  ofs << "sssp," << ingress_method << "," << tolerance << "," << load_elapsed_secs << ",0," << runtime << "," << (load_elapsed_secs + runtime) << std::endl;
+  ofs << "approximate_diameter," << ingress_method << "," << tolerance << "," << load_elapsed_secs << ",0," << runtime << "," << (load_elapsed_secs + runtime) << std::endl;
 
   ofs.close();
 
