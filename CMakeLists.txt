@@ -567,13 +567,13 @@ endif()
 #endif()
 
 
-#disable Wno-unused-local-typedefs if available
-check_cxx_compiler_flag(-Wno-unused-local-typedefs HAS_WNO_LOCAL_TYPEDEFS)
-if(HAS_WNO_LOCAL_TYPEDEFS)
-  set(WNO_LOCAL_TYPEDEFS "-Wno-unused-local-typedefs")
-else()
-  set(WNO_LOCAL_TYPEDEFS "")
-endif()
+##disable Wno-unused-local-typedefs if available
+#check_cxx_compiler_flag(-Wno-unused-local-typedefs HAS_WNO_LOCAL_TYPEDEFS)
+#if(HAS_WNO_LOCAL_TYPEDEFS)
+#  set(WNO_LOCAL_TYPEDEFS "-Wno-unused-local-typedefs")
+#else()
+#  set(WNO_LOCAL_TYPEDEFS "")
+#endif()
 
 
 # Set the debug flags
