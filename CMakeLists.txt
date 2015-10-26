@@ -527,26 +527,26 @@ set(CMAKE_REQUIRED_LIBRARIES ${crlbackup})
 include(CheckCXXCompilerFlag)
 ## ============================================================================
 # check if MARCH is set
-if (NOT MARCH)
-  #set to native if supported
-  check_cxx_compiler_flag(-march=native HAS_MARCH_NATIVE)
-  if(HAS_MARCH_NATIVE)
-    set(MARCH "native")
-  else()
-    set(MARCH "x86-64")
-  endif()
-endif()
-
-# check if MTUNE is set
-if (NOT MTUNE)
-  #set to native if supported
-  check_cxx_compiler_flag(-mtune=native HAS_MTUNE_NATIVE)
-  if(HAS_MTUNE_NATIVE)
-    set(MTUNE "native")
-  else()
-    set(MTUNE "x86-64")
-  endif()
-endif()
+#if (NOT MARCH)
+#  #set to native if supported
+#  check_cxx_compiler_flag(-march=native HAS_MARCH_NATIVE)
+#  if(HAS_MARCH_NATIVE)
+#    set(MARCH "native")
+#  else()
+#    set(MARCH "x86-64")
+#  endif()
+#endif()
+#
+## check if MTUNE is set
+#if (NOT MTUNE)
+#  #set to native if supported
+#  check_cxx_compiler_flag(-mtune=native HAS_MTUNE_NATIVE)
+#  if(HAS_MTUNE_NATIVE)
+#    set(MTUNE "native")
+#  else()
+#    set(MTUNE "x86-64")
+#  endif()
+#endif()
 
 ## ============================================================================
 # Setup compiler
