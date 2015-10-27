@@ -12,7 +12,7 @@ function download_file {
     fi
     curl $1 -o $2
   else
-    wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc2.tar.gz -O cmake.tar.gz
+    wget $1 -O $2
   fi
 } # end of download file
 function print_help {
@@ -273,17 +273,16 @@ if [ -z $CMAKE ]; then
   mkdir deps
   cd deps
 
-#  This doesn't work
-#  # get the cmake software page
-#  rm -f software.html
-#  download_file "http://www.cmake.org/cmake/resources/software.html" software.html
-#  # look for the first tar.gz I can download
-#  cmakedownload=`grep -m 1 -o -e "href=\"http://www\\.cmake.*\\.tar\\.gz\"" software.html | grep -o -e "http.*\\.tar\\.gz"`
-#  if [ -z "$cmakedownload" ] ; then
-#    echo "Unable to locate CMake package. You will have to install it yourself."
-#    exit 1
-#  fi
-#  rm -f cmake.tar.gz
+  # get the cmake software page
+  rm -f software.html
+  download_file "http://www.cmake.org/cmake/resources/software.html" software.html
+  # look for the first tar.gz I can download
+  cmakedownload=`grep -m 1 -o -e "href=\"http://www\\.cmake.*\\.tar\\.gz\"" software.html | grep -o -e "http.*\\.tar\\.gz"`
+  if [ -z "$cmakedownload" ] ; then
+    echo "Unable to locate CMake package. You will have to install it yourself."
+    exit 1
+  fi
+  rm -f cmake.tar.gz
   set -e
   download_file $cmakedownload cmake.tar.gz
   tar -xzvf cmake.tar.gz
