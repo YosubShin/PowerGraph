@@ -17,6 +17,7 @@ export CXX=/opt/gcc/4.9.3/bin/g++
 export PROJECT_HOME=/projects/sciteam/jsb/shin1
 cat $HOME/.crayccm/ccm_nodelist.$PBS_JOBID | sort -u > $PROJECT_HOME/machines
 
+
 # Build OpenMPI
 cd $PROJECT_HOME
 mkdir openmpi
@@ -30,16 +31,17 @@ make install -j16
 export PATH=$PATH:$PROJECT_HOME/openmpi/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROJECT_HOME/openmpi/lib
 
+
 # Build PowerGraph
 cd $PROJECT_HOME
 git clone https://github.com/YosubShin/PowerGraph
 cd PowerGraph
 
-./configure --no_jvm
+./configure --no_jvm --no_openmp
 
 cd release/toolkits/graph_analytics
 make pagerank -j16
 
 # Execute PowerGraph with PageRank
-$PROJECT_HOME/openmpi/bin/mpiexec -n 2 -hostfile $PROJECT_HOME/machines ./pagerank --graph=$PROJECT_HOME/graphs/ukweb/ --format=snap --iterations=10 --graph_opts="ingress=random"
+$PROJECT_HOME/openmpi/bin/mpiexec -n 2 -hostfile $PROJECT_HOME/machines $PROJECT_HOME/PowerGraph/release/toolkits/graph_analytics/pagerank --graph=$PROJECT_HOME/graphs/ukweb/ --format=snap --iterations=10 --graph_opts="ingress=random"
 ```
