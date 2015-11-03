@@ -37,7 +37,7 @@ cd $PROJECT_HOME
 git clone https://github.com/YosubShin/PowerGraph
 cd PowerGraph
 
-./configure --no_jvm --no_openmp
+./configure --no_jvm
 
 cd release/toolkits/graph_analytics
 make pagerank -j16
