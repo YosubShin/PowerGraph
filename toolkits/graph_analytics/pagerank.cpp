@@ -22,6 +22,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 #include <fstream>
 
 #include <graphlab.hpp>
@@ -222,6 +223,8 @@ int main(int argc, char** argv) {
     clopts.get_engine_args().set_option("sched_allv", true);
   }
 
+  graphlab::timer timer;
+
   // Build the graph ----------------------------------------------------------
   graph_type graph(dc, clopts);
   if(powerlaw > 0) { // make a synthetic graph
@@ -237,8 +240,15 @@ int main(int argc, char** argv) {
     clopts.print_description();
     return 0;
   }
+
+  double load_time = timer.current_time();
+  timer.start();
+
   // must call finalize before querying the graph
   graph.finalize();
+
+  double finalize_time = timer.current_time();
+  double ingress_time = load_time + finalize_time;
   dc.cout() << "#vertices: " << graph.num_vertices()
             << " #edges:" << graph.num_edges() << std::endl;
 
@@ -248,14 +258,17 @@ int main(int argc, char** argv) {
   // Running The Engine -------------------------------------------------------
   graphlab::omni_engine<pagerank> engine(dc, graph, exec_type, clopts);
   engine.signal_all();
+  timer.start();
   engine.start();
-  const double runtime = engine.elapsed_seconds();
+  const double runtime = timer.current_time();
   dc.cout() << "Finished Running engine in " << runtime
             << " seconds." << std::endl;
 
 
   const double total_rank = graph.map_reduce_vertices<double>(map_rank);
   std::cout << "Total rank: " << total_rank << std::endl;
+
+  const double replication_factor = (double)graph.num_replicas()/graph.num_vertices();
 
   // Save the final graph -----------------------------------------------------
   if (saveprefix != "") {
@@ -267,6 +280,21 @@ int main(int argc, char** argv) {
 
   double totalpr = graph.map_reduce_vertices<double>(pagerank_sum);
   std::cout << "Totalpr = " << totalpr << "\n";
+
+  const std::string output_filename = "~/output.csv";
+  std::ofstream ofs;
+  ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
+  if (!ofs.is_open()) {
+    std::cout << "Failed to open output file.\n";
+    return EXIT_FAILURE;
+  }
+  std::string ingress_method = "";
+  clopts.get_graph_args().get_option("ingress", ingress_method);
+
+  // algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time
+  ofs << "pagerank," << ingress_method << "," << ITERATIONS << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << std::endl;
+
+  ofs.close();
 
   // Tear-down communication layer and quit -----------------------------------
 //  graphlab::mpi_tools::finalize();
