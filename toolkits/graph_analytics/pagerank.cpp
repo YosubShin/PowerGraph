@@ -169,7 +169,7 @@ double pagerank_sum(graph_type::vertex_type v) {
 
 int main(int argc, char** argv) {
   // Initialize control plain using mpi
-  graphlab::mpi_tools::init(argc, argv);
+//  graphlab::mpi_tools::init(argc, argv);
   graphlab::distributed_control dc;
   global_logger().set_log_level(LOG_INFO);
 
@@ -269,7 +269,7 @@ int main(int argc, char** argv) {
   std::cout << "Totalpr = " << totalpr << "\n";
 
   // Tear-down communication layer and quit -----------------------------------
-  graphlab::mpi_tools::finalize();
+//  graphlab::mpi_tools::finalize();
   return EXIT_SUCCESS;
 } // End of main
 

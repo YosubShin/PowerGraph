@@ -391,6 +391,9 @@ namespace graphlab {
       // open listening socket
       if (sockhandle == 0) {
         listensock = socket(AF_INET, SOCK_STREAM, 0);
+
+        evutil_make_listen_socket_reuseable(listensock);
+
         // uninteresting boiler plate. Set the port number and socket type
         sockaddr_in my_addr;
         my_addr.sin_family = AF_INET;
