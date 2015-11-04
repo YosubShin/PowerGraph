@@ -5,6 +5,9 @@ import string
 import subprocess
 import time
 
+project_home = '/projects/sciteam/jsb/shin1'
+custom_environments = 'CC=/opt/gcc/4.9.3/bin/gcc CXX=/opt/gcc/4.9.3/bin/g++ PATH=$PATH:%s/openmpi/bin LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%s/openmpi/lib' % (project_home, project_home)
+
 """
 Usage: rpcexec -n n_to_start -f [hostsfile] [program] [options]
 To start local only: rpcexec [program] [options]
@@ -40,14 +43,14 @@ def get_ssh_cmd(gui, machines, port, machineid, prog, opts):
   #endif
 
   if (machines[i] == "localhost" or machines[i].startswith("127.")):
-    cmd = 'env SPAWNNODES=%s SPAWNID=%d %s %s' % (allmachines,i, prog, opts)
+    cmd = 'env %s SPAWNNODES=%s SPAWNID=%d %s %s' % (custom_environments, allmachines,i, prog, opts)
   elif (port[i] == 22):
-    cmd = sshcmd + '%s "cd %s ; env SPAWNNODES=%s SPAWNID=%d %s %s %s"' %                       \
-                    (machines[machineid], escape(cwd), escape(allmachines),machineid,           \
+    cmd = sshcmd + '%s "cd %s ; env %s SPAWNNODES=%s SPAWNID=%d %s %s %s"' %                       \
+                    (machines[machineid], escape(cwd), custom_environments, escape(allmachines),machineid,           \
                     guicmd, escape(prog), escape(opts))
   else:
-    cmd = sshcmd + '-oPort=%d %s "cd %s ; env SPAWNNODES=%s SPAWNID=%d %s %s %s"' %              \
-                    (port[machineid], machines[machineid], escape(cwd), escape(allmachines),     \
+    cmd = sshcmd + '-oPort=%d %s "cd %s ; env %s SPAWNNODES=%s SPAWNID=%d %s %s %s"' %              \
+                    (port[machineid], machines[machineid], escape(cwd), custom_environments, escape(allmachines),     \
                     machineid, guicmd, escape(prog), escape(opts))
   #endif
   return cmd
@@ -67,14 +70,14 @@ def get_screen_cmd(gui, machines, port, machineid, prog, opts):
   guicmd = ''
 
   if (machines[i] == "localhost" or machines[i].startswith("127.")):
-    cmd = ['export SPAWNNODES=%s SPAWNID=%d ; %s %s' % (allmachines,i, prog, opts)]
+    cmd = ['export %s SPAWNNODES=%s SPAWNID=%d ; %s %s' % (custom_environments, allmachines,i, prog, opts)]
   elif (port[i] == 22):
-    cmd = [sshcmd + '%s "cd %s ; export SPAWNNODES=%s SPAWNID=%d; %s %s %s ; bash -il"' %                       \
-                    (machines[machineid], escape(cwd), escape(allmachines),machineid,           \
+    cmd = [sshcmd + '%s "cd %s ; export %s SPAWNNODES=%s SPAWNID=%d; %s %s %s ; bash -il"' %                       \
+                    (machines[machineid], escape(cwd), custom_environments, escape(allmachines),machineid,           \
                     guicmd, escape(prog), escape(opts))]
   else:
-    cmd = [sshcmd + '-oPort=%d %s "cd %s ; export SPAWNNODES=%s SPAWNID=%d; %s %s %s ; bash -il"' %              \
-                    (port[machineid], machines[machineid], escape(cwd), escape(allmachines),     \
+    cmd = [sshcmd + '-oPort=%d %s "cd %s ; export %s SPAWNNODES=%s SPAWNID=%d; %s %s %s ; bash -il"' %              \
+                    (port[machineid], machines[machineid], escape(cwd), custom_environments, escape(allmachines),     \
                     machineid, guicmd, escape(prog), escape(opts))]
   #endif
   return cmd
@@ -150,7 +153,7 @@ if (printhelp):
 #endif
 
 if (nmachines == 0 and hostsfile == ''):
-  cmd = 'env SPAWNNODES=localhost SPAWNID=0 %s %s' % (prog, opts)
+  cmd = 'env %s SPAWNNODES=localhost SPAWNID=0 %s %s' % (custom_environments, prog, opts)
   p = shell_popen(cmd)
   os.waitpid(p.pid, 0)
   exit(0)
