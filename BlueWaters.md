@@ -49,5 +49,8 @@ $PROJECT_HOME/openmpi/bin/mpiexec -n 2 -hostfile $PROJECT_HOME/machines $PROJECT
 # Execute PowerGraph without OpenMPI
 
 ```bash
-python rpcexec.py -n 2 -f $PROJECT_HOME/machines $PROJECT_HOME/PowerGraph/release/toolkits/graph_analytics/pagerank --graph=$PROJECT_HOME/graphs/ukweb/  --format=snap --iterations=2 --graph_opts="ingress=random"
+# Configure PowerGraph without mpi
+./configure --no_jvm --no_mpi
+
+python $PROJECT_HOME/PowerGraph/rpcexec.py -n 2 -f $PROJECT_HOME/machines $PROJECT_HOME/PowerGraph/release/toolkits/graph_analytics/pagerank --graph=$PROJECT_HOME/graphs/livejournal/  --format=snap --iterations=2 --graph_opts="ingress=random"
 ```
