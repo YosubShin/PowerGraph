@@ -281,7 +281,7 @@ int main(int argc, char** argv) {
   double totalpr = graph.map_reduce_vertices<double>(pagerank_sum);
   std::cout << "Totalpr = " << totalpr << "\n";
 
-  const std::string output_filename = "~/output.csv";
+  const std::string output_filename = "/projects/sciteam/jsb/shin1/output.csv";
   std::ofstream ofs;
   ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
   if (!ofs.is_open()) {
