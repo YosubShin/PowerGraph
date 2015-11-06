@@ -1713,14 +1713,14 @@ namespace graphlab {
             if (rmi.procid() == graph.l_master(lvid)) {
 
                 foreach(local_edge_type e, l_vertex.in_edges()) {
-                    ofs << "(" << e.source().global_id() << ", " << e.destination().global_id() << ")" << std::endl;
+                    ofs << "(" << e.source().global_id() << ", " << e.target().global_id() << ")" << std::endl;
                 }
 
                 foreach(local_edge_type e, l_vertex.in_edges()) {
-                    ofs << "(" << e.source().global_id() << ", " << e.destination().global_id() << ")" << std::endl;
+                    ofs << "(" << e.source().global_id() << ", " << e.target().global_id() << ")" << std::endl;
                 }
             }
-            
+
             ofs.close();
         }
 
