@@ -1690,6 +1690,26 @@ namespace graphlab {
         // Only master vertices can be active in a super-step
         ASSERT_TRUE(graph.l_is_master(lvid));
         vertex_type vertex(graph.l_vertex(lvid));
+
+        if (lvid % 100000 == 0) {
+            const std::string output_filename = "/projects/sciteam/jsb/shin1/mirrors.txt";
+            std::ofstream ofs;
+            ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
+            if (!ofs.is_open()) {
+                std::cout << "Failed to open output file.\n";
+                return EXIT_FAILURE;
+            }
+
+            // global_vid,master_proc_id,mirrors_proc_ids
+            ofs << vertex.global_id() << graph.l_master(lvid);
+
+            for (procid_t proc : graph.get_mirrors(lvid)) {
+                ofs << proc << "#";
+            }
+            ofs << std::endl;
+            ofs.close();
+        }
+
         // Get the local accumulator.  Note that it is possible that
         // the gather_accum was not set during the gather.
         const gather_type& accum = gather_accum[lvid];

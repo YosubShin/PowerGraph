@@ -2813,6 +2813,16 @@ namespace graphlab {
       return lvid2record[lvid].owner == rpc.procid();
     }
 
+    vector<size_t> get_mirrors(lvid_type lvid) const {
+        ASSERT_LT(lvid, lvid2record.size());
+        vector<size_t> result;
+        vertex_record& v = lvid2record[lvid];
+        foreach(size_t proc, v.mirrors()) {
+            result.push_back(proc);
+        }
+        return result;
+    }
+
     /** \internal
      * \brief Returns the master procid for vertex lvid.
      */
