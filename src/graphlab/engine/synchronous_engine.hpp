@@ -1704,7 +1704,7 @@ namespace graphlab {
             }
 
             // global_vid,master_proc_id,mirrors_proc_ids
-            ofs << l_vertex.global_id() << graph.l_master(lvid);
+            ofs << l_vertex.global_id() << "," << graph.l_master(lvid) << ",";
             foreach(const procid_t& mirror, l_vertex.mirrors()) {
                 ofs << mirror << "#";
             }
