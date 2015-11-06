@@ -1693,17 +1693,18 @@ namespace graphlab {
         vertex_type vertex(graph.l_vertex(lvid));
 
         if (lvid % 100000 == 0) {
+            local_vertex_type l_vertex = graph.l_vertex(lvid);
+
             const std::string output_filename = "/projects/sciteam/jsb/shin1/mirrors.txt";
             std::ofstream ofs;
             ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
             if (!ofs.is_open()) {
                 std::cout << "Failed to open output file.\n";
-                return EXIT_FAILURE;
+                return;
             }
 
             // global_vid,master_proc_id,mirrors_proc_ids
-            ofs << vertex.global_id() << graph.l_master(lvid);
-            local_vertex_type l_vertex = graph.l_vertex(lvid);
+            ofs << l_vertex.global_id() << graph.l_master(lvid);
             foreach(const procid_t& mirror, l_vertex.mirrors()) {
                 ofs << mirror << "#";
             }
