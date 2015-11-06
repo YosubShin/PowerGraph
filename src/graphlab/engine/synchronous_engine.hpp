@@ -25,6 +25,7 @@
 #ifndef GRAPHLAB_SYNCHRONOUS_ENGINE_HPP
 #define GRAPHLAB_SYNCHRONOUS_ENGINE_HPP
 
+#include <fstream>
 #include <deque>
 #include <boost/bind.hpp>
 
@@ -1702,7 +1703,6 @@ namespace graphlab {
 
             // global_vid,master_proc_id,mirrors_proc_ids
             ofs << vertex.global_id() << graph.l_master(lvid);
-
             for (procid_t proc : graph.get_mirrors(lvid)) {
                 ofs << proc << "#";
             }
