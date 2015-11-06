@@ -2812,13 +2812,6 @@ namespace graphlab {
       ASSERT_LT(lvid, lvid2record.size());
       return lvid2record[lvid].owner == rpc.procid();
     }
-
-      mirror_type& l_get_mirrors(lvid_type lvid) const {
-        ASSERT_LT(lvid, lvid2record.size());
-        vertex_record& v = lvid2record[lvid];
-        return v.mirrors();
-    }
-
     /** \internal
      * \brief Returns the master procid for vertex lvid.
      */
