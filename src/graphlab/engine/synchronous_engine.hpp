@@ -1692,7 +1692,7 @@ namespace graphlab {
         ASSERT_TRUE(graph.l_is_master(lvid));
         vertex_type vertex(graph.l_vertex(lvid));
 
-        if (lvid % 100000 == 0) {
+        if (lvid % 10000 == 0 && rmi.procid() == graph.l_master(lvid)) {
             local_vertex_type l_vertex = graph.l_vertex(lvid);
 
             const std::string output_filename = "/projects/sciteam/jsb/shin1/mirrors.txt";
