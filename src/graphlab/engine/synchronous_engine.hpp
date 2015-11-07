@@ -1695,7 +1695,7 @@ namespace graphlab {
         if (lvid % 10000 == 0 && rmi.procid() == graph.l_master(lvid)) {
             local_vertex_type l_vertex = graph.l_vertex(lvid);
 
-            const std::string output_filename = "/projects/sciteam/jsb/shin1/mirrors.txt";
+            const std::string output_filename = "/tmp/mirrors.txt";
             std::ofstream ofs;
             ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
             if (!ofs.is_open()) {
