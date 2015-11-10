@@ -99,6 +99,7 @@ def shell_wait_native(cmd):
 
 nmachines = 0
 hostsfile = ''
+topologyaware = 0
 prog = ''
 opts = ''
 gui = 0
@@ -123,6 +124,9 @@ while(i < len(sys.argv)):
     inscreen = 1
     screenname = sys.argv[i+1]
     i = i + 2
+  elif sys.argv[i] == '-t':
+    topologyaware = 1
+    i = i + 1
   else:
     prog = sys.argv[i]
     if (len(sys.argv) > i+1):
@@ -193,6 +197,34 @@ for i in range(nmachines):
     exit(0)
 #endfor
 f.close()
+
+if topologyaware == 1:
+  topologies = [''] * nmachines
+  for i in range(nmachines):
+    nid = int(machines[i][3:])  # extract 1234 out of 'nid01234'
+    topology = Popen(["rca-helper", "-C", str(nid)], stdout=PIPE).communicate()[0].strip()
+    topologies[i] = topology
+  #endfor
+  try:
+    f = open('%s/topologies' % project_home, 'w')
+  except:
+    print
+    print("Unable to open topologies file")
+    print
+    exit(0)
+  #endtry
+
+  try:
+    f.write('\n'.join(topologies))
+  except:
+    print
+    print("Unable to write topologies file")
+    print
+    exit(0)
+
+  f.close()
+
+  custom_environments += 'TOPOLOGIES_FILE=%s/topologies' % project_home
 
 # the commands to run to start for each node
 cmd = [None] * nmachines

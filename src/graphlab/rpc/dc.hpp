@@ -82,6 +82,11 @@ struct dc_init_param{
   */
   std::vector<std::string> machines;
 
+  /**
+   * A vector of coordinates of the node in 3d-Torus topology in the supercomputer interconnect.
+   */
+  std::vector<std::vector<int>> topologies;
+
   /** Additional construction options of the form
     "key1=value1,key2=value2".
 

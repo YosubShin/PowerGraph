@@ -47,6 +47,32 @@ bool init_param_from_env(dc_init_param& param) {
   for (size_t i = 0;i < param.machines.size(); ++i) {
     param.machines[i] = param.machines[i] + ":" + tostr(10000 + i);
   }
+
+  char* topologies_file = getenv("TOPOLOGIES_FILE");
+  if (topologies_file != NULL) {
+    std::string topologies_file_string = topologies_file;
+    std::ifstream ifs;
+    ifs.open(topologies_file_string.c_str());
+    if (!ifs.is_open()) {
+      std::cout << "Failed to open topologies file.\n";
+      return false;
+    }
+
+    param.topologies.resize(param.machines.size());
+    for (int i = 0; i < param.machines.size(); ++i) {
+      std::string line;
+      std::getline(ifs, line);
+      std::vector<std::string> str_coord =  strsplit(line, " ");
+      std::vector<int> coord(3);
+      for (int j = 0; j < 3; ++j) {
+        coord[j] = fromstr(str_coord[j]);
+      }
+      param.topologies.push_back(coord);
+    }
+
+    ifs.close();
+  }
+
   // set defaults
   param.numhandlerthreads = RPC_DEFAULT_NUMHANDLERTHREADS;
   param.commtype = RPC_DEFAULT_COMMTYPE;
