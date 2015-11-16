@@ -62,7 +62,7 @@ bool init_param_from_env(dc_init_param& param) {
     for (size_t i = 0; i < param.machines.size(); ++i) {
       std::string line;
       std::getline(ifs, line);
-      std::vector<std::string> str_coord =  strsplit(line, " ");
+      std::vector<const std::string> str_coord =  strsplit(line, " ");
       std::vector<int> coord(3);
       for (size_t j = 0; j < 3; ++j) {
         coord[j] = fromstr(str_coord[j]);
