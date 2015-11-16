@@ -10,6 +10,7 @@ ccmlogin
 module swap PrgEnv-cray PrgEnv-gnu
 module load cmake
 module swap gcc/4.8.2 gcc/4.9.3
+module load rca
 
 export CC=/opt/gcc/4.9.3/bin/gcc
 export CXX=/opt/gcc/4.9.3/bin/g++
