@@ -296,14 +296,15 @@ int main(int argc, char** argv) {
 
   ofs.close();
 
-//  std::cout << "Topologies:\n";
-//  for (size_t i = 0; i < dc.topologies().size(); ++i) {
-//    std::cout << "procid: " << i << ": "
-//      << dc.topologies()[i][0] << " "
-//      << dc.topologies()[i][1] << " "
-//      << dc.topologies()[i][2] << std::endl;
-//  }
-
+  std::cout << "Topologies:\n";
+  for (size_t i = 0; i < dc.topologies().size(); ++i) {
+    std::cout << "procid: " << i << ": ";
+    std::vector<int> coord = dc.topologies()[i];
+    for (size_t j = 0; j < coord.size(); ++j) {
+      std::cout << coord[j] << " ";
+    }
+    std::cout << std::endl;
+  }
 
   // Tear-down communication layer and quit -----------------------------------
 //  graphlab::mpi_tools::finalize();
