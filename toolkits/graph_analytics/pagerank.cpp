@@ -281,29 +281,31 @@ int main(int argc, char** argv) {
   double totalpr = graph.map_reduce_vertices<double>(pagerank_sum);
   std::cout << "Totalpr = " << totalpr << "\n";
 
-  const std::string output_filename = "/projects/sciteam/jsb/shin1/output.csv";
-  std::ofstream ofs;
-  ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
-  if (!ofs.is_open()) {
-    std::cout << "Failed to open output file.\n";
-    return EXIT_FAILURE;
-  }
-  std::string ingress_method = "";
-  clopts.get_graph_args().get_option("ingress", ingress_method);
-
-  // algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time
-  ofs << "pagerank," << ingress_method << "," << ITERATIONS << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << std::endl;
-
-  ofs.close();
-
-  std::cout << "Topologies:\n";
-  for (size_t i = 0; i < dc.topologies().size(); ++i) {
-    std::cout << "procid: " << i << ": ";
-    std::vector<int> coord = dc.topologies()[i];
-    for (size_t j = 0; j < coord.size(); ++j) {
-      std::cout << coord[j] << " ";
+  if (dc.procid() == 0) {
+    const std::string output_filename = "/projects/sciteam/jsb/shin1/output.csv";
+    std::ofstream ofs;
+    ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
+    if (!ofs.is_open()) {
+      std::cout << "Failed to open output file.\n";
+      return EXIT_FAILURE;
     }
-    std::cout << std::endl;
+    std::string ingress_method = "";
+    clopts.get_graph_args().get_option("ingress", ingress_method);
+
+    // algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time
+    ofs << "pagerank," << ingress_method << "," << ITERATIONS << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << std::endl;
+
+    ofs.close();
+
+    std::cout << "Topologies:\n";
+    for (size_t i = 0; i < dc.topologies().size(); ++i) {
+      std::cout << "procid: " << i << ": ";
+      std::vector<int> coord = dc.topologies()[i];
+      for (size_t j = 0; j < coord.size(); ++j) {
+        std::cout << coord[j] << " ";
+      }
+      std::cout << std::endl;
+    }
   }
 
   // Tear-down communication layer and quit -----------------------------------
