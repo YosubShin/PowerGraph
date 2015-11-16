@@ -28,6 +28,7 @@
 #include <graphlab/rpc/dc_init_from_env.hpp>
 #include <graphlab/util/stl_util.hpp>
 #include <graphlab/logger/logger.hpp>
+#include <iostream>
 namespace graphlab {
 
 bool init_param_from_env(dc_init_param& param) {
@@ -51,6 +52,7 @@ bool init_param_from_env(dc_init_param& param) {
   char* topologies_file = getenv("TOPOLOGIES_FILE");
   if (topologies_file != NULL) {
     std::string topologies_file_string = topologies_file;
+    std::cout << topologies_file_string << std::endl;;
     std::ifstream ifs;
     ifs.open(topologies_file_string.c_str());
     if (!ifs.is_open()) {
@@ -62,12 +64,14 @@ bool init_param_from_env(dc_init_param& param) {
     for (size_t i = 0; i < param.machines.size(); ++i) {
       std::string line;
       std::getline(ifs, line);
+      std::cout << line << std::endl;;
       std::vector<std::string> str_coord =  strsplit(line, " ");
       std::vector<int> coord(3);
       for (size_t j = 0; j < 3; ++j) {
         std::stringstream strm(str_coord[j]);
         strm >> coord[j];
       }
+      std::cout << coord[0] << ", " << coord[1] << ", " << coord[2] << std::endl;;
       param.topologies.push_back(coord);
     }
 
