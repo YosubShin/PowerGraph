@@ -281,7 +281,7 @@ int main(int argc, char** argv) {
   double totalpr = graph.map_reduce_vertices<double>(pagerank_sum);
   std::cout << "Totalpr = " << totalpr << "\n";
 
-  if (dc.proc() == 0) {
+  if (dc.procid() == 0) {
     const std::string output_filename = "/projects/sciteam/jsb/shin1/output.csv";
     std::ofstream ofs;
     ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
@@ -297,7 +297,7 @@ int main(int argc, char** argv) {
 
     ofs.close();
 
-    for (int i = 0; i < dc.topologies().size(); ++i) {
+    for (size_t i = 0; i < dc.topologies().size(); ++i) {
       std::cout << "Topologies:\n";
       std::cout << "procid: " << i << ": "
         << dc.topologies()[i][0] << " "
