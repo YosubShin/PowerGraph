@@ -224,7 +224,7 @@ class distributed_control{
              procid_t curmachineid,
              size_t numhandlerthreads,
              dc_comm_type commtype = RPC_DEFAULT_COMMTYPE,
-             std::vector<std::vector<int> > topologies);
+             std::vector<std::vector<int> > topologies = std::vector<std::vector<int> >());
 
   /// a pointer to the communications subsystem
   dc_impl::dc_comm_base* comm;
