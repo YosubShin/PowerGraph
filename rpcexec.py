@@ -202,7 +202,7 @@ if topologyaware == 1:
   topologies = [''] * nmachines
   for i in range(nmachines):
     nid = int(machines[i][3:])  # extract 1234 out of 'nid01234'
-    topology = Popen(["rca-helper", "-C", str(nid)], stdout=PIPE).communicate()[0].strip()
+    topology = subprocess.Popen(["rca-helper", "-C", str(nid)], stdout=subprocess.PIPE).communicate()[0].strip()
     topologies[i] = topology
   #endfor
   try:
