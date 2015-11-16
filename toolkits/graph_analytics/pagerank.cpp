@@ -302,7 +302,7 @@ int main(int argc, char** argv) {
       std::cout << "procid: " << i << ": "
         << dc.topologies()[i][0] << " "
         << dc.topologies()[i][1] << " "
-        << dc.topologies()[i][1] << std::endl;
+        << dc.topologies()[i][2] << std::endl;
     }
   }
 
