@@ -52,7 +52,6 @@ bool init_param_from_env(dc_init_param& param) {
   char* topologies_file = getenv("TOPOLOGIES_FILE");
   if (topologies_file != NULL) {
     std::string topologies_file_string = topologies_file;
-    std::cout << topologies_file_string << std::endl;;
     std::ifstream ifs;
     ifs.open(topologies_file_string.c_str());
     if (!ifs.is_open()) {
@@ -70,7 +69,6 @@ bool init_param_from_env(dc_init_param& param) {
         std::stringstream strm(str_coord[j]);
         strm >> coord[j];
       }
-      std::cout << coord[0] << ", " << coord[1] << ", " << coord[2] << std::endl;;
       param.topologies.push_back(coord);
     }
 
