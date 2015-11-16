@@ -85,7 +85,7 @@ struct dc_init_param{
   /**
    * A vector of coordinates of the node in 3d-Torus topology in the supercomputer interconnect.
    */
-  std::vector<std::vector<int>> topologies;
+  std::vector<std::vector<int> > topologies;
 
   /** Additional construction options of the form
     "key1=value1,key2=value2".
@@ -237,7 +237,7 @@ class distributed_control{
   std::vector<atomic<size_t> > fcall_handler_active;
   dense_bitset fcall_handler_blockers;
 
-  std::vector<std::vector<int>> topologies_;
+  std::vector<std::vector<int> > topologies_;
 
   struct fcallqueue_entry {
     std::vector<function_call_block> calls;
@@ -317,7 +317,7 @@ class distributed_control{
 
   ~distributed_control();
 
-  const vector<vector<int>> topologies() const {
+  const vector<vector<int> > topologies() const {
     return topologies_;
   }
 
