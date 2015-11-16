@@ -296,13 +296,13 @@ int main(int argc, char** argv) {
 
   ofs.close();
 
-  std::cout << "Topologies:\n";
-  for (size_t i = 0; i < dc.topologies().size(); ++i) {
-    std::cout << "procid: " << i << ": "
-      << dc.topologies()[i][0] << " "
-      << dc.topologies()[i][1] << " "
-      << dc.topologies()[i][2] << std::endl;
-  }
+//  std::cout << "Topologies:\n";
+//  for (size_t i = 0; i < dc.topologies().size(); ++i) {
+//    std::cout << "procid: " << i << ": "
+//      << dc.topologies()[i][0] << " "
+//      << dc.topologies()[i][1] << " "
+//      << dc.topologies()[i][2] << std::endl;
+//  }
 
 
   // Tear-down communication layer and quit -----------------------------------
