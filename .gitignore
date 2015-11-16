@@ -27,3 +27,4 @@ tags
 .ycm_extra_conf*
 
 .idea
+doxygen.log

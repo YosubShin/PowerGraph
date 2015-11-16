@@ -237,6 +237,8 @@ class distributed_control{
   std::vector<atomic<size_t> > fcall_handler_active;
   dense_bitset fcall_handler_blockers;
 
+  std::vector<std::vector<int>> topologies_;
+
   struct fcallqueue_entry {
     std::vector<function_call_block> calls;
     char* chunk_src;
@@ -315,6 +317,9 @@ class distributed_control{
 
   ~distributed_control();
 
+  const vector<vector<int>> topologies() const {
+    return topologies_;
+  }
 
   // The procid of the last distributed_control object created
   // this is quite legacy stuff when we technically permitted multiple DC

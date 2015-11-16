@@ -140,7 +140,8 @@ distributed_control::distributed_control() {
         initparam.initstring,
         initparam.curmachineid,
         initparam.numhandlerthreads,
-        initparam.commtype);
+        initparam.commtype,
+        initparam.topologies);
   INITIALIZE_TRACER(dc_receive_queuing, "dc: time spent on enqueue");
   INITIALIZE_TRACER(dc_receive_multiplexing, "dc: time spent exploding a chunk");
   INITIALIZE_TRACER(dc_call_dispatch, "dc: time spent issuing RPC calls");
@@ -151,7 +152,8 @@ distributed_control::distributed_control(dc_init_param initparam) {
         initparam.initstring,
         initparam.curmachineid,
         initparam.numhandlerthreads,
-        initparam.commtype);
+        initparam.commtype,
+        initparam.topologies);
   INITIALIZE_TRACER(dc_receive_queuing, "dc: time spent on enqueue");
   INITIALIZE_TRACER(dc_receive_multiplexing, "dc: time spent exploding a chunk");
   INITIALIZE_TRACER(dc_call_dispatch, "dc: time spent issuing RPC calls");
@@ -488,7 +490,8 @@ void distributed_control::init(const std::vector<std::string> &machines,
             const std::string &initstring,
             procid_t curmachineid,
             size_t numhandlerthreads,
-            dc_comm_type commtype) {
+            dc_comm_type commtype,
+            std::vector<std::vector<int>> topologies) {
 
   if (numhandlerthreads == RPC_DEFAULT_NUMHANDLERTHREADS) {
     // autoconfigure
@@ -603,6 +606,8 @@ void distributed_control::init(const std::vector<std::string> &machines,
   last_dc = this;
   // set the static variable for the get_instance_procid() function
   last_dc_procid = localprocid;
+
+  topologies_ = topologies;
 
   barrier();
   // initialize the empty stream

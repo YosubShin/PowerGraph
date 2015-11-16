@@ -281,20 +281,31 @@ int main(int argc, char** argv) {
   double totalpr = graph.map_reduce_vertices<double>(pagerank_sum);
   std::cout << "Totalpr = " << totalpr << "\n";
 
-  const std::string output_filename = "/projects/sciteam/jsb/shin1/output.csv";
-  std::ofstream ofs;
-  ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
-  if (!ofs.is_open()) {
-    std::cout << "Failed to open output file.\n";
-    return EXIT_FAILURE;
+  if (dc.proc() == 0) {
+    const std::string output_filename = "/projects/sciteam/jsb/shin1/output.csv";
+    std::ofstream ofs;
+    ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
+    if (!ofs.is_open()) {
+      std::cout << "Failed to open output file.\n";
+      return EXIT_FAILURE;
+    }
+    std::string ingress_method = "";
+    clopts.get_graph_args().get_option("ingress", ingress_method);
+
+    // algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time
+    ofs << "pagerank," << ingress_method << "," << ITERATIONS << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << std::endl;
+
+    ofs.close();
+
+    for (int i = 0; i < dc.topologies().size(); ++i) {
+      std::cout << "Topologies:\n";
+      std::cout << "procid: " << i << ": "
+        << dc.topologies()[i][0] << " "
+        << dc.topologies()[i][1] << " "
+        << dc.topologies()[i][1] << std::endl;
+    }
   }
-  std::string ingress_method = "";
-  clopts.get_graph_args().get_option("ingress", ingress_method);
 
-  // algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time
-  ofs << "pagerank," << ingress_method << "," << ITERATIONS << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << std::endl;
-
-  ofs.close();
 
   // Tear-down communication layer and quit -----------------------------------
 //  graphlab::mpi_tools::finalize();
