@@ -317,7 +317,7 @@ class distributed_control{
 
   ~distributed_control();
 
-  const vector<vector<int> > topologies() const {
+  const std::vector<std::vector<int> > topologies() const {
     return topologies_;
   }
 
