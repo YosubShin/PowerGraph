@@ -59,12 +59,12 @@ bool init_param_from_env(dc_init_param& param) {
     }
 
     param.topologies.resize(param.machines.size());
-    for (int i = 0; i < param.machines.size(); ++i) {
+    for (size_t i = 0; i < param.machines.size(); ++i) {
       std::string line;
       std::getline(ifs, line);
       std::vector<std::string> str_coord =  strsplit(line, " ");
       std::vector<int> coord(3);
-      for (int j = 0; j < 3; ++j) {
+      for (size_t j = 0; j < 3; ++j) {
         coord[j] = fromstr(str_coord[j]);
       }
       param.topologies.push_back(coord);

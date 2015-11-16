@@ -491,7 +491,7 @@ void distributed_control::init(const std::vector<std::string> &machines,
             procid_t curmachineid,
             size_t numhandlerthreads,
             dc_comm_type commtype,
-            std::vector<std::vector<int>> topologies) {
+            std::vector<std::vector<int> > topologies) {
 
   if (numhandlerthreads == RPC_DEFAULT_NUMHANDLERTHREADS) {
     // autoconfigure
