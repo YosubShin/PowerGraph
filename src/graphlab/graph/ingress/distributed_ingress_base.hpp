@@ -31,6 +31,7 @@
 #include <graphlab/util/hopscotch_map.hpp>
 #include <graphlab/rpc/buffered_exchange.hpp>
 #include <graphlab/macros_def.hpp>
+#include <iostream>
 namespace graphlab {
 
   /**
@@ -328,6 +329,7 @@ namespace graphlab {
         while(vertex_exchange.recv(sending_proc, vertex_buffer)) {
           foreach(const vertex_buffer_record& rec, vertex_buffer) {
             lvid_type lvid(-1);
+            std::cout << rec.vid << std::endl;
             if (graph.vid2lvid.find(rec.vid) == graph.vid2lvid.end()) {
               if (vid2lvid_buffer.find(rec.vid) == vid2lvid_buffer.end()) {
                 lvid = lvid_start + vid2lvid_buffer.size();
