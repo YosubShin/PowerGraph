@@ -59,7 +59,7 @@ bool init_param_from_env(dc_init_param& param) {
       return false;
     }
 
-    param.topologies.resize(param.machines.size());
+    param.topologies.reserve(param.machines.size());
     for (size_t i = 0; i < param.machines.size(); ++i) {
       std::string line;
       std::getline(ifs, line);
