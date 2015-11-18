@@ -464,9 +464,9 @@ namespace graphlab {
         vid_buffer.flush();
         rpc.barrier();
 
-        // receive all vids owned by me
-        mutex flying_vids_lock;
-        boost::unordered_map<vertex_id_type, mirror_type> flying_vids;
+        // receive all vids sent to me
+        mutex received_vids_lock;
+        boost::unordered_map<vertex_id_type, mirror_type> received_vids;
 #ifdef _OPENMP
 #pragma omp parallel
 #endif
@@ -475,21 +475,10 @@ namespace graphlab {
           procid_t recvid;
           while(vid_buffer.recv(recvid, buffer)) {
             foreach(const vertex_id_type vid, buffer) {
-              if (graph.vid2lvid.find(vid) == graph.vid2lvid.end()) {
-                if (vid2lvid_buffer.find(vid) == vid2lvid_buffer.end()) {
-                  flying_vids_lock.lock();
-                  mirror_type& mirrors = flying_vids[vid];
-                  flying_vids_lock.unlock();
-                  mirrors.set_bit(recvid);
-                } else {
-                  lvid_type lvid = vid2lvid_buffer[vid];
-                  graph.lvid2record[lvid]._mirrors.set_bit(recvid);
-                }
-              } else {
-                lvid_type lvid = graph.vid2lvid[vid];
-                graph.lvid2record[lvid]._mirrors.set_bit(recvid);
-                updated_lvids.set_bit(lvid);
-              }
+              received_vids_lock.lock();
+              mirror_type& mirrors = received_vids[vid];
+              received_vids_lock.unlock();
+              mirrors.set_bit(recvid);
             }
           }
         }
@@ -503,24 +492,25 @@ namespace graphlab {
         /**************************************************************************/
 
 #ifdef _OPENMP
-        buffered_exchange<std::pair<vertex_id_type, mirror_type> > master_vids_mirrors(rpc.dc(), omp_get_max_threads());
+        buffered_exchange<std::pair<procid_t, vertex_id_type> > master_vids_mirrors(rpc.dc(), omp_get_max_threads());
         buffered_exchange<std::pair<procid_t, vertex_id_type> > vid_master_loc_buffer(rpc.dc(), omp_get_max_threads());
 #else
-        buffered_exchange<std::pair<vertex_id_type, mirror_type> > master_vids_mirrors(rpc.dc());
+        buffered_exchange<std::pair<procid_t, vertex_id_type> > master_vids_mirrors(rpc.dc());
         buffered_exchange<std::pair<procid_t, vertex_id_type> > vid_master_loc_buffer(rpc.dc());
 #endif
-        for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = flying_vids.begin();
-             it != flying_vids.end(); ++it) {
+        for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = received_vids.begin();
+             it != received_vids.end(); ++it) {
 //            const procid_t master = calculate_centroid_proc(it->second);
             const procid_t master = 0;
-#ifdef _OPENMP
-            master_vids_mirrors.send(master, *it, omp_get_thread_num());
-#else
-            master_vids_mirrors.send(master, *it);
-#endif
 
             // Scatter new master information to mirrors
             foreach(const procid_t& mirror, it->second) {
+#ifdef _OPENMP
+                vid_buffer.send(master, std::make_pair(mirror, it->first), omp_get_thread_num());
+#else
+                vid_buffer.send(master, std::make_pair(mirror, it->first));
+#endif
+
 #ifdef _OPENMP
                 vid_master_loc_buffer.send(mirror, std::make_pair(master, it->first), omp_get_thread_num());
 #else
@@ -540,38 +530,54 @@ namespace graphlab {
         /*       New master receives mirrors information                          */
         /*                                                                        */
         /**************************************************************************/
+        // receive all vids owned by me
+        mutex flying_vids_lock;
+        boost::unordered_map<vertex_id_type, mirror_type> flying_vids;
 
-        boost::unordered_map<vertex_id_type, mirror_type> flying_vids2;
+#ifdef _OPENMP
+#pragma omp parallel
+#endif
         {
-            typename buffered_exchange<std::pair<vertex_id_type, mirror_type> >::buffer_type m_buffer;
+            typename buffered_exchange<std::pair<procid_t, vertex_id_type> >::buffer_type n_buffer;
             procid_t recvid;
-            while(master_vids_mirrors.recv(recvid, m_buffer)) {
-                foreach (const vid_mirror_pair_type vid_pair, m_buffer) {
-                    flying_vids2.insert(vid_pair);
+            while(master_vids_mirrors.recv(recvid, buffer)) {
+                foreach(const procid_vid_pair_type procid_vid_pair, n_buffer) {
+                    procid_t mirror = procid_vid_pair.first;
+                    vertex_id_type vid = procid_vid_pair.second;
+                    if (graph.vid2lvid.find(vid) == graph.vid2lvid.end()) {
+                        if (vid2lvid_buffer.find(vid) == vid2lvid_buffer.end()) {
+                            flying_vids_lock.lock();
+                            mirror_type& mirrors = flying_vids[vid];
+                            flying_vids_lock.unlock();
+                            mirrors.set_bit(mirror);
+                        } else {
+                            lvid_type lvid = vid2lvid_buffer[vid];
+                            graph.lvid2record[lvid]._mirrors.set_bit(mirror);
+                        }
+                    } else {
+                        lvid_type lvid = graph.vid2lvid[vid];
+                        graph.lvid2record[lvid]._mirrors.set_bit(mirror);
+                        updated_lvids.set_bit(lvid);
+                    }
                 }
             }
         }
-        master_vids_mirrors.clear();
 
+        master_vids_mirrors.clear();
         // reallocate spaces for the flying vertices.
         size_t vsize_old = graph.lvid2record.size();
-        //TODO: Resize is not working properly. Needs to be fixed for efficiency.
-        size_t vsize_new = vsize_old + flying_vids2.size();
+        size_t vsize_new = vsize_old + flying_vids.size();
         graph.lvid2record.resize(vsize_new);
         graph.local_graph.resize(vsize_new);
-
-        {
-            typename buffered_exchange<std::pair<vertex_id_type, mirror_type> >::buffer_type m_buffer;
-            procid_t recvid;
-            for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = flying_vids2.begin(); it != flying_vids2.end(); ++it) {
-                lvid_type lvid = lvid_start + vid2lvid_buffer.size();
-                vertex_id_type gvid = it->first;
-                graph.lvid2record[lvid].owner = rpc.procid();
-                graph.lvid2record[lvid].gvid = gvid;
-                graph.lvid2record[lvid]._mirrors= it->second;
-                vid2lvid_buffer[gvid] = lvid;
-                std::cout << "proc " << rpc.procid() << " receives vid, mirrors pair for vertex " << gvid << " from prelim. master proc " << recvid << std::endl;
-            }
+        for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = flying_vids.begin();
+             it != flying_vids.end(); ++it) {
+            lvid_type lvid = lvid_start + vid2lvid_buffer.size();
+            vertex_id_type gvid = it->first;
+            graph.lvid2record[lvid].owner = rpc.procid();
+            graph.lvid2record[lvid].gvid = gvid;
+            graph.lvid2record[lvid]._mirrors = it->second;
+            vid2lvid_buffer[gvid] = lvid;
+            // std::cout << "proc " << rpc.procid() << " recevies flying vertex " << gvid << std::endl;
         }
 
         rpc.barrier();
