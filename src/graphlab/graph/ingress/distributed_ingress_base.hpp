@@ -511,7 +511,8 @@ namespace graphlab {
 #endif
         for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = flying_vids.begin();
              it != flying_vids.end(); ++it) {
-            const procid_t master = calculate_centroid_proc(it->second);
+//            const procid_t master = calculate_centroid_proc(it->second);
+            const procid_t master = 0;
 #ifdef _OPENMP
             master_vids_mirrors.send(master, *it, omp_get_thread_num());
 #else
@@ -542,6 +543,7 @@ namespace graphlab {
 
         // reallocate spaces for the flying vertices.
         size_t vsize_old = graph.lvid2record.size();
+        //TODO: Resize is not working properly. Needs to be fixed for efficiency.
 //        size_t vsize_new = vsize_old + master_vids_mirrors.size(); //TODO: Is this giving us correct size of buffer at each proc?
 //        graph.lvid2record.resize(vsize_new);
 //        graph.local_graph.resize(vsize_new);
