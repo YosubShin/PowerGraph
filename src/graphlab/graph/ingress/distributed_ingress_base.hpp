@@ -542,9 +542,9 @@ namespace graphlab {
 
         // reallocate spaces for the flying vertices.
         size_t vsize_old = graph.lvid2record.size();
-        size_t vsize_new = vsize_old + master_vids_mirrors.size(); //TODO: Is this giving us correct size of buffer at each proc?
-        graph.lvid2record.resize(vsize_new);
-        graph.local_graph.resize(vsize_new);
+//        size_t vsize_new = vsize_old + master_vids_mirrors.size(); //TODO: Is this giving us correct size of buffer at each proc?
+//        graph.lvid2record.resize(vsize_new);
+//        graph.local_graph.resize(vsize_new);
 
         {
             typename buffered_exchange<std::pair<vertex_id_type, mirror_type> >::buffer_type m_buffer;
