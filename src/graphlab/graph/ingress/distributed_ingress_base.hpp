@@ -116,7 +116,7 @@ namespace graphlab {
     ingress_edge_decision<VertexData, EdgeData> edge_decision;
 
     std::map<std::vector<int>, procid_t> topology2proc;
-    std::map<mirror_type, procid_t> mirrors2centroid_proc;
+    boost::unordered_map<mirror_type, procid_t> mirrors2centroid_proc;
 
   public:
     distributed_ingress_base(distributed_control& dc, graph_type& graph) :
