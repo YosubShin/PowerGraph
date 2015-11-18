@@ -181,6 +181,8 @@ namespace graphlab {
 
       procid_t calculate_centroid_proc(const mirror_type& mirrors) {
           std::vector<std::vector<int> > topologies = rpc.dc().topologies();
+          ASSERT_GT(topologies.size(), 0);
+
           for (size_t i = 0; i < topologies.size(); ++i) {
               if (topology2proc.find(topologies[i]) == topology2proc.end()) {
                   topology2proc[topologies[i]] = (unsigned short) i;
@@ -193,6 +195,7 @@ namespace graphlab {
 
           int min_hops_sum = 1000000;
           procid_t centroid_proc = 65535;
+
           for (size_t i = 0; i < topologies.size(); ++i) {
               std::vector<int> candidate_centroid = topologies[i];
               int hops_sum = 0;
@@ -201,6 +204,7 @@ namespace graphlab {
                       continue;
                   }
                   std::vector<int> compared_position = topologies[j];
+                  ASSERT_EQ(candidate_centroid.size(), 3);
                   for (size_t k = 0; k < candidate_centroid.size(); ++k) {
                       hops_sum += abs(candidate_centroid[k] - compared_position[k]);
                   }
