@@ -32,6 +32,7 @@
 #include <graphlab/rpc/buffered_exchange.hpp>
 #include <graphlab/macros_def.hpp>
 #include <iostream>
+#include <map>
 namespace graphlab {
 
   /**
@@ -112,6 +113,9 @@ namespace graphlab {
     /// Ingress decision object for computing the edge destination. 
     ingress_edge_decision<VertexData, EdgeData> edge_decision;
 
+    std::map<std::vector<int>, procid_t> topology2proc;
+    std::map<mirror_type, procid_t> mirrors2centroid_proc;
+
   public:
     distributed_ingress_base(distributed_control& dc, graph_type& graph) :
       rpc(dc, this), graph(graph), 
@@ -159,7 +163,43 @@ namespace graphlab {
       vertex_combine_strategy = combine_strategy;
     }
 
+      procid_t calculate_centroid_proc(const mirror_type& mirrors) {
+          std::vector<std::vector<int> > topologies = rpc.dc().topologies();
+          for (size_t i = 0; i < topologies.size(); ++i) {
+              if (topology2proc.find(topologies[i]) == topology2proc.end()) {
+                  topology2proc[topologies[i]] = (unsigned short) i;
+              }
+          }
+          // Look for cached proc_id
+          if (mirrors2centroid_proc.find(mirrors) != mirrors2centroid_proc.end()) {
+              return mirrors2centroid_proc[mirrors];
+          }
 
+          int min_hops_sum = 1000000;
+          procid_t centroid_proc = 65535;
+          for (size_t i = 0; i < topologies.size(); ++i) {
+              std::vector<int> candidate_centroid = topologies[i];
+              int hops_sum = 0;
+              for (size_t j = 0; j < topologies.size(); ++j) {
+                  if (i == j) {
+                      continue;
+                  }
+                  std::vector<int> compared_position = topologies[j];
+                  for (size_t k = 0; k < candidate_centroid.size(); ++k) {
+                      hops_sum += abs(candidate_centroid[k] - compared_position[k]);
+                  }
+              }
+
+              if (hops_sum < min_hops_sum) {
+                  min_hops_sum = hops_sum;
+                  centroid_proc = (procid_t) i;
+              }
+          }
+          ASSERT_NE(min_hops_sum, 1000000);
+          ASSERT_NE(centroid_proc, 65535);
+          mirrors2centroid_proc[mirrors] = centroid_proc;
+          return centroid_proc;
+      }
 
     /** \brief Finalize completes the local graph data structure 
      * and the vertex record information. 
@@ -435,21 +475,92 @@ namespace graphlab {
         }
 
         vid_buffer.clear();
-        // reallocate spaces for the flying vertices. 
-        size_t vsize_old = graph.lvid2record.size();
-        size_t vsize_new = vsize_old + flying_vids.size();
-        graph.lvid2record.resize(vsize_new);
-        graph.local_graph.resize(vsize_new);
+
+        /**************************************************************************/
+        /*                                                                        */
+        /*       Calculate centroid master from mirror positions                  */
+        /*                                                                        */
+        /**************************************************************************/
+
+#ifdef _OPENMP
+        buffered_exchange<std::pair<vertex_id_type, mirror_type> > master_vids_mirrors(rpc.dc(), omp_get_max_threads());
+        buffered_exchange<vertex_id_type> vid_master_loc_buffer(rpc.dc(), omp_get_max_threads());
+#else
+        buffered_exchange<std::pair<vertex_id_type, mirror_type> > master_vids_mirrors(rpc.dc());
+        buffered_exchange<vertex_id_type> vid_master_loc_buffer(rpc.dc());
+#endif
         for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = flying_vids.begin();
              it != flying_vids.end(); ++it) {
-          lvid_type lvid = lvid_start + vid2lvid_buffer.size();
-          vertex_id_type gvid = it->first; 
-          graph.lvid2record[lvid].owner = rpc.procid();
-          graph.lvid2record[lvid].gvid = gvid;
-          graph.lvid2record[lvid]._mirrors= it->second;
-          vid2lvid_buffer[gvid] = lvid;
-          // std::cout << "proc " << rpc.procid() << " recevies flying vertex " << gvid << std::endl;
+            const procid_t master = calculate_centroid_proc(it->second);
+#ifdef _OPENMP
+            master_vids_mirrors.send(master, *it, omp_get_thread_num());
+#else
+            master_vids_mirrors.send(master, *it);
+#endif
+
+            // Scatter new master information to mirrors
+            foreach(const procid_t& mirror, it->second) {
+#ifdef _OPENMP
+                vid_master_loc_buffer.send(mirror, it->first, omp_get_thread_num());
+#else
+                vid_master_loc_buffer.send(mirror, it->first);
+#endif
+            }
+
+            std::cout << "preliminary master proc " << rpc.procid() << " sends vid, mirrors pair for vertex " << it->first << " to master proc " << master << std::endl;
         }
+        master_vids_mirrors.flush();
+        vid_master_loc_buffer.flush();
+        rpc.barrier();
+
+        /**************************************************************************/
+        /*                                                                        */
+        /*       New master receives mirrors information                          */
+        /*                                                                        */
+        /**************************************************************************/
+
+        // reallocate spaces for the flying vertices.
+        size_t vsize_old = graph.lvid2record.size();
+        size_t vsize_new = vsize_old + master_vids_mirrors.size(); //TODO: Is this giving us correct size of buffer at each proc?
+        graph.lvid2record.resize(vsize_new);
+        graph.local_graph.resize(vsize_new);
+
+        {
+            typename buffered_exchange<std::pair<vertex_id_type, mirror_type> >::buffer_type m_buffer;
+            procid_t recvid;
+            while(master_vids_mirrors.recv(recvid, m_buffer)) {
+                foreach (const std::pair<vertex_id_type, mirror_type> vid_pair, m_buffer) {
+                    lvid_type lvid = lvid_start + vid2lvid_buffer.size();
+                    vertex_id_type gvid = vid_pair.first;
+                    graph.lvid2record[lvid].owner = rpc.procid();
+                    graph.lvid2record[lvid].gvid = gvid;
+                    graph.lvid2record[lvid]._mirrors= vid_pair.second;
+                    vid2lvid_buffer[gvid] = lvid;
+                    std::cout << "proc " << rpc.procid() << " recevies vid, mirrors pair for vertex " << gvid << " from proc " << recvid << std::endl;
+                }
+            }
+        }
+
+        /**************************************************************************/
+        /*                                                                        */
+        /* Mirrors receive new master information and updates its local master proc info  */
+        /*                                                                        */
+        /**************************************************************************/
+#ifdef _OPENMP
+#pragma omp parallel
+#endif
+        {
+            typename buffered_exchange<vertex_id_type>::buffer_type buffer;
+            procid_t recvid;
+            while(vid_master_loc_buffer.recv(recvid, buffer)) {
+                foreach(const vertex_id_type vid, buffer) {
+                    vertex_record& vrec = graph.lvid2record[graph.vid2lvid[vid]];
+                    vrec.owner = recvid;
+                    std::cout << "proc " << rpc.procid() << " recevies vid " << vid << " from master proc " << recvid << " to update its local view of master" << std::endl;
+                }
+            }
+        }
+
       } // end of master handshake
 
       /**************************************************************************/
