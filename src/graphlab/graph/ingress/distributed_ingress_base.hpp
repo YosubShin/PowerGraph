@@ -29,7 +29,6 @@
 #include <graphlab/graph/graph_gather_apply.hpp>
 #include <graphlab/util/memory_info.hpp>
 #include <graphlab/util/hopscotch_map.hpp>
-#include <graphlab/util/dense_bitset.hpp>
 #include <graphlab/rpc/buffered_exchange.hpp>
 #include <graphlab/macros_def.hpp>
 #include <iostream>
@@ -123,12 +122,9 @@ namespace graphlab {
       {
           std::size_t seed = 0;
 
-          for(mirror_type::bit_pos_iterator it = x.begin();
-              it != x.end(); ++it)
-          {
-              boost::hash_combine(seed, *it);
+          foreach(const procid_t& mirror, x) {
+              boost::hash_combine(seed, mirror);
           }
-
           return seed;
       }
     };
