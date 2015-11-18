@@ -563,7 +563,7 @@ namespace graphlab {
         {
             typename buffered_exchange<std::pair<vertex_id_type, mirror_type> >::buffer_type m_buffer;
             procid_t recvid;
-            for (boost::unordered_map<vertex_id_type, mirror_type>::iterator it = flying_vids2.begin(); it != flying_vids2.end(); ++it) {
+            for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = flying_vids2.begin(); it != flying_vids2.end(); ++it) {
                 lvid_type lvid = lvid_start + vid2lvid_buffer.size();
                 vertex_id_type gvid = it->first;
                 graph.lvid2record[lvid].owner = rpc.procid();
