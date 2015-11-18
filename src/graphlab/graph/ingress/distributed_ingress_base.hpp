@@ -54,7 +54,7 @@ namespace graphlab {
     typedef typename graph_type::mirror_type mirror_type;
 
     typedef typename std::pair<vertex_id_type, mirror_type> vid_mirror_pair_type;
-
+    typedef typename std::pair<procid_t, vertex_id_type> procid_vid_pair_type;
    
     /// The rpc interface for this object
     dc_dist_object<distributed_ingress_base> rpc;
@@ -504,10 +504,10 @@ namespace graphlab {
 
 #ifdef _OPENMP
         buffered_exchange<std::pair<vertex_id_type, mirror_type> > master_vids_mirrors(rpc.dc(), omp_get_max_threads());
-        buffered_exchange<vertex_id_type> vid_master_loc_buffer(rpc.dc(), omp_get_max_threads());
+        buffered_exchange<std::pair<procid_t, vertex_id_type> > vid_master_loc_buffer(rpc.dc(), omp_get_max_threads());
 #else
         buffered_exchange<std::pair<vertex_id_type, mirror_type> > master_vids_mirrors(rpc.dc());
-        buffered_exchange<vertex_id_type> vid_master_loc_buffer(rpc.dc());
+        buffered_exchange<std::pair<procid_t, vertex_id_type> > vid_master_loc_buffer(rpc.dc());
 #endif
         for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = flying_vids.begin();
              it != flying_vids.end(); ++it) {
@@ -521,9 +521,9 @@ namespace graphlab {
             // Scatter new master information to mirrors
             foreach(const procid_t& mirror, it->second) {
 #ifdef _OPENMP
-                vid_master_loc_buffer.send(mirror, it->first, omp_get_thread_num());
+                vid_master_loc_buffer.send(mirror, std::make_pair(master, it->first), omp_get_thread_num());
 #else
-                vid_master_loc_buffer.send(mirror, it->first);
+                vid_master_loc_buffer.send(mirror, std::make_pair(master, it->first));
 #endif
             }
 
@@ -570,13 +570,13 @@ namespace graphlab {
 #pragma omp parallel
 #endif
         {
-            typename buffered_exchange<vertex_id_type>::buffer_type buffer;
+            typename buffered_exchange<std::pair<procid_t, vertex_id_type> >::buffer_type n_buffer;
             procid_t recvid;
-            while(vid_master_loc_buffer.recv(recvid, buffer)) {
-                foreach(const vertex_id_type vid, buffer) {
-                    vertex_record& vrec = graph.lvid2record[graph.vid2lvid[vid]];
-                    vrec.owner = recvid;
-                    std::cout << "proc " << rpc.procid() << " recevies vid " << vid << " from master proc " << recvid << " to update its local view of master" << std::endl;
+            while(vid_master_loc_buffer.recv(recvid, n_buffer)) {
+                foreach(const procid_vid_pair_type procid_vid_pair, n_buffer) {
+                    vertex_record& vrec = graph.lvid2record[graph.vid2lvid[procid_vid_pair.second]];
+                    vrec.owner = procid_vid_pair.first;
+                    std::cout << "proc " << rpc.procid() << " recevies vid " << vid << " from preliminary master proc " << recvid << " to update its local view of master" << procid_vid_pair.first << std::endl;
                 }
             }
         }
