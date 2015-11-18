@@ -541,26 +541,36 @@ namespace graphlab {
         /*                                                                        */
         /**************************************************************************/
 
-        // reallocate spaces for the flying vertices.
-        size_t vsize_old = graph.lvid2record.size();
-        //TODO: Resize is not working properly. Needs to be fixed for efficiency.
-//        size_t vsize_new = vsize_old + master_vids_mirrors.size(); //TODO: Is this giving us correct size of buffer at each proc?
-//        graph.lvid2record.resize(vsize_new);
-//        graph.local_graph.resize(vsize_new);
-
+        boost::unordered_map<vertex_id_type, mirror_type> flying_vids2;
         {
             typename buffered_exchange<std::pair<vertex_id_type, mirror_type> >::buffer_type m_buffer;
             procid_t recvid;
             while(master_vids_mirrors.recv(recvid, m_buffer)) {
                 foreach (const vid_mirror_pair_type vid_pair, m_buffer) {
-                    lvid_type lvid = lvid_start + vid2lvid_buffer.size();
-                    vertex_id_type gvid = vid_pair.first;
-                    graph.lvid2record[lvid].owner = rpc.procid();
-                    graph.lvid2record[lvid].gvid = gvid;
-                    graph.lvid2record[lvid]._mirrors= vid_pair.second;
-                    vid2lvid_buffer[gvid] = lvid;
-                    std::cout << "proc " << rpc.procid() << " receives vid, mirrors pair for vertex " << gvid << " from prelim. master proc " << recvid << std::endl;
+                    flying_vids2.insert(vid_pair);
                 }
+            }
+        }
+        master_vids_mirrors.clear();
+
+        // reallocate spaces for the flying vertices.
+        size_t vsize_old = graph.lvid2record.size();
+        //TODO: Resize is not working properly. Needs to be fixed for efficiency.
+        size_t vsize_new = vsize_old + flying_vids2.size();
+        graph.lvid2record.resize(vsize_new);
+        graph.local_graph.resize(vsize_new);
+
+        {
+            typename buffered_exchange<std::pair<vertex_id_type, mirror_type> >::buffer_type m_buffer;
+            procid_t recvid;
+            for (boost::unordered_map<vertex_id_type, mirror_type>::iterator it = flying_vids2.begin(); it != flying_vids2.end(); ++it) {
+                lvid_type lvid = lvid_start + vid2lvid_buffer.size();
+                vertex_id_type gvid = it->first;
+                graph.lvid2record[lvid].owner = rpc.procid();
+                graph.lvid2record[lvid].gvid = gvid;
+                graph.lvid2record[lvid]._mirrors= it->second;
+                vid2lvid_buffer[gvid] = lvid;
+                std::cout << "proc " << rpc.procid() << " receives vid, mirrors pair for vertex " << gvid << " from prelim. master proc " << recvid << std::endl;
             }
         }
 
@@ -587,6 +597,7 @@ namespace graphlab {
             }
         }
 
+        vid_master_loc_buffer.clear();
         rpc.barrier();
         std::cout << "Mirrors received new master information\n";
 
