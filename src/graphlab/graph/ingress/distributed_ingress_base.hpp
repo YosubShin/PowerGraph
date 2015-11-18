@@ -478,8 +478,8 @@ namespace graphlab {
             foreach(const vertex_id_type vid, buffer) {
               received_vids_lock.lock();
               mirror_type& mirrors = received_vids[vid];
-              received_vids_lock.unlock();
               mirrors.set_bit(recvid);
+              received_vids_lock.unlock();
             }
           }
         }
@@ -519,7 +519,7 @@ namespace graphlab {
 #endif
             }
 
-            std::cout << "preliminary master proc " << rpc.procid() << " sends vid, mirrors pair for vertex " << it->first << " to master proc " << master << std::endl;
+            std::cout << "preliminary master proc " << rpc.procid() << " sends vid, mirror pairs for vertex " << it->first << " to master proc " << master << std::endl;
         }
         master_vids_mirrors.flush();
         vid_master_loc_buffer.flush();
