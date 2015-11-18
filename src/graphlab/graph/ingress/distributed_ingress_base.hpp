@@ -540,7 +540,7 @@ namespace graphlab {
         {
             typename buffered_exchange<std::pair<procid_t, vertex_id_type> >::buffer_type n_buffer;
             procid_t recvid;
-            while(master_vids_mirrors.recv(recvid, buffer)) {
+            while(master_vids_mirrors.recv(recvid, n_buffer)) {
                 foreach(const procid_vid_pair_type procid_vid_pair, n_buffer) {
                     procid_t mirror = procid_vid_pair.first;
                     vertex_id_type vid = procid_vid_pair.second;
