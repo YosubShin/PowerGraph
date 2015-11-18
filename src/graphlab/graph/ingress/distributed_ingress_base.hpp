@@ -590,6 +590,13 @@ namespace graphlab {
 
         } // end of master handshake
 
+        rpc.full_barrier();
+        for (lvid_type i = lvid_start; i < graph.lvid2record.size(); ++i) {
+            vertex_record& vrec = graph.lvid2record[i];
+            std::cout << "proc " << rpc.procid() << ": vid(" << vrec.gvid << "), owner(" << vrec.owner <<  "), num_mirrors(" << vrec.num_mirrors() << ")\n";
+        }
+        rpc.full_barrier();
+
       /**************************************************************************/
       /*                                                                        */
       /*                        Merge in vid2lvid_buffer                        */
