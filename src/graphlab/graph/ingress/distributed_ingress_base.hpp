@@ -29,6 +29,7 @@
 #include <graphlab/graph/graph_gather_apply.hpp>
 #include <graphlab/util/memory_info.hpp>
 #include <graphlab/util/hopscotch_map.hpp>
+#include <graphlab/util/dense_bitset.hpp>
 #include <graphlab/rpc/buffered_exchange.hpp>
 #include <graphlab/macros_def.hpp>
 #include <iostream>
@@ -115,8 +116,25 @@ namespace graphlab {
     /// Ingress decision object for computing the edge destination. 
     ingress_edge_decision<VertexData, EdgeData> edge_decision;
 
+    struct mirror_hash
+          : std::unary_function<mirror_type, std::size_t>
+    {
+      std::size_t operator()(mirror_type const& x) const
+      {
+          std::size_t seed = 0;
+
+          for(mirror_type::bit_pos_iterator it = x.begin();
+              it != x.end(); ++it)
+          {
+              boost::hash_combine(seed, *it);
+          }
+
+          return seed;
+      }
+    };
+
     std::map<std::vector<int>, procid_t> topology2proc;
-    boost::unordered_map<mirror_type, procid_t> mirrors2centroid_proc;
+    boost::unordered_map<mirror_type, procid_t, mirror_hash> mirrors2centroid_proc;
 
   public:
     distributed_ingress_base(distributed_control& dc, graph_type& graph) :
