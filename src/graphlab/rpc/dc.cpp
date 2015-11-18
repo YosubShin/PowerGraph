@@ -608,7 +608,8 @@ void distributed_control::init(const std::vector<std::string> &machines,
   last_dc_procid = localprocid;
 
   topologies_ = topologies;
-  for (int i = 0; i < topologies_.size(); ++i) {
+  ASSERT_GT(topologies_.size(), 0);
+  for (size_t i = 0; i < topologies_.size(); ++i) {
     logstream(LOG_INFO) << "Topology for proc " << i << " : " << topologies_[i][0] << ", " << topologies_[i][1] << ", " << topologies_[i][2] << std::endl;
   }
 

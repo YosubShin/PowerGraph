@@ -72,6 +72,10 @@ bool init_param_from_env(dc_init_param& param) {
       param.topologies.push_back(coord);
     }
 
+    for (size_t i = 0; i < param.topologies.size(); ++i) {
+      logstream(LOG_INFO) << "Topology for proc " << i << " : " << param.topologies[i][0] << ", " << param.topologies[i][1] << ", " << param.topologies[i][2] << std::endl;
+    }
+
     ifs.close();
   }
 
