@@ -506,9 +506,9 @@ namespace graphlab {
             // Scatter new master information to mirrors
             foreach(const procid_t& mirror, it->second) {
 #ifdef _OPENMP
-                vid_buffer.send(master, std::make_pair(mirror, it->first), omp_get_thread_num());
+                master_vids_mirrors.send(master, std::make_pair(mirror, it->first), omp_get_thread_num());
 #else
-                vid_buffer.send(master, std::make_pair(mirror, it->first));
+                master_vids_mirrors.send(master, std::make_pair(mirror, it->first));
 #endif
 
 #ifdef _OPENMP
