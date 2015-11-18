@@ -53,6 +53,8 @@ namespace graphlab {
     typedef typename graph_type::vertex_record vertex_record;
     typedef typename graph_type::mirror_type mirror_type;
 
+    typedef typename std::pair<vertex_id_type, mirror_type> vid_mirror_pair_type;
+
    
     /// The rpc interface for this object
     dc_dist_object<distributed_ingress_base> rpc;
@@ -529,7 +531,7 @@ namespace graphlab {
             typename buffered_exchange<std::pair<vertex_id_type, mirror_type> >::buffer_type m_buffer;
             procid_t recvid;
             while(master_vids_mirrors.recv(recvid, m_buffer)) {
-                foreach (const std::pair<vertex_id_type, mirror_type> vid_pair, m_buffer) {
+                foreach (const vid_mirror_pair_type vid_pair, m_buffer) {
                     lvid_type lvid = lvid_start + vid2lvid_buffer.size();
                     vertex_id_type gvid = vid_pair.first;
                     graph.lvid2record[lvid].owner = rpc.procid();
