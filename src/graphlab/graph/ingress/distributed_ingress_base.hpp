@@ -452,9 +452,10 @@ namespace graphlab {
 #pragma omp parallel for
 #endif
         // send not owned vids to their master
+        //FIXME No, master here is not the final master, so everything should be sent to preliminary master.
         for (lvid_type i = lvid_start; i < graph.lvid2record.size(); ++i) {
           procid_t master = graph.lvid2record[i].owner;
-          if (master != rpc.procid())
+//          if (master != rpc.procid())
 #ifdef _OPENMP
             vid_buffer.send(master, graph.lvid2record[i].gvid, omp_get_thread_num());
 #else
