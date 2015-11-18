@@ -532,6 +532,7 @@ namespace graphlab {
         master_vids_mirrors.flush();
         vid_master_loc_buffer.flush();
         rpc.barrier();
+        std::cout << "Preliminary masters received vertices from mirrors and then forwarded mirror info to master, and also sent back new master information back to mirrors\n";
 
         /**************************************************************************/
         /*                                                                        */
@@ -556,10 +557,13 @@ namespace graphlab {
                     graph.lvid2record[lvid].gvid = gvid;
                     graph.lvid2record[lvid]._mirrors= vid_pair.second;
                     vid2lvid_buffer[gvid] = lvid;
-                    std::cout << "proc " << rpc.procid() << " recevies vid, mirrors pair for vertex " << gvid << " from proc " << recvid << std::endl;
+                    std::cout << "proc " << rpc.procid() << " receives vid, mirrors pair for vertex " << gvid << " from prelim. master proc " << recvid << std::endl;
                 }
             }
         }
+
+        rpc.barrier();
+        std::cout << "Masters received mirror information and updated themselves\n";
 
         /**************************************************************************/
         /*                                                                        */
@@ -576,12 +580,15 @@ namespace graphlab {
                 foreach(const procid_vid_pair_type procid_vid_pair, n_buffer) {
                     vertex_record& vrec = graph.lvid2record[graph.vid2lvid[procid_vid_pair.second]];
                     vrec.owner = procid_vid_pair.first;
-                    std::cout << "proc " << rpc.procid() << " recevies vid " << procid_vid_pair.second << " from preliminary master proc " << recvid << " to update its local view of master" << procid_vid_pair.first << std::endl;
+                    std::cout << "proc " << rpc.procid() << " receives vid " << procid_vid_pair.second << " from preliminary master proc " << recvid << " to update its local view of master " << procid_vid_pair.first << std::endl;
                 }
             }
         }
 
-      } // end of master handshake
+        rpc.barrier();
+        std::cout << "Mirrors received new master information\n";
+
+        } // end of master handshake
 
       /**************************************************************************/
       /*                                                                        */
