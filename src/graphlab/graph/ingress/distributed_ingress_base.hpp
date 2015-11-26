@@ -608,6 +608,7 @@ namespace graphlab {
                     vertex_record& vrec = graph.lvid2record[graph.vid2lvid[procid_vid_pair.second]];
                     vrec.owner = procid_vid_pair.first;
                     std::cout << "proc " << rpc.procid() << " receives vid " << procid_vid_pair.second << " from preliminary master proc " << recvid << " to update its local view of master " << procid_vid_pair.first << std::endl;
+                    ASSERT_EQ(graph.lvid2record[graph.vid2lvid[procid_vid_pair.second]].owner, procid_vid_pair.first);
                 }
             }
         }
