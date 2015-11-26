@@ -142,6 +142,16 @@ namespace graphlab {
       vertex_exchange(dc), edge_exchange(dc),
 #endif
       edge_decision(dc) {
+        std::vector<std::vector<int> > topologies = rpc.dc().topologies();
+        ASSERT_GT(topologies.size(), 0);
+
+        for (size_t i = 0; i < topologies.size(); ++i) {
+            if (topology2proc.find(topologies[i]) == topology2proc.end()) {
+                topology2proc[topologies[i]] = (unsigned short) i;
+            }
+        }
+
+
       rpc.barrier();
     } // end of constructor
 
@@ -180,19 +190,12 @@ namespace graphlab {
     }
 
       procid_t calculate_centroid_proc(const mirror_type& mirrors) {
-          std::vector<std::vector<int> > topologies = rpc.dc().topologies();
-          ASSERT_GT(topologies.size(), 0);
-
-          for (size_t i = 0; i < topologies.size(); ++i) {
-              if (topology2proc.find(topologies[i]) == topology2proc.end()) {
-                  topology2proc[topologies[i]] = (unsigned short) i;
-              }
-          }
           // Look for cached proc_id
           if (mirrors2centroid_proc.find(mirrors) != mirrors2centroid_proc.end()) {
               return mirrors2centroid_proc[mirrors];
           }
 
+          std::vector<std::vector<int> > topologies = rpc.dc().topologies();
           int min_hops_sum = 1000000;
           procid_t centroid_proc = 65535;
 
@@ -205,6 +208,7 @@ namespace graphlab {
                   }
                   std::vector<int> compared_position = topologies[j];
                   ASSERT_EQ(candidate_centroid.size(), 3);
+                  ASSERT_EQ(compared_position.size(), 3);
                   for (size_t k = 0; k < candidate_centroid.size(); ++k) {
                       hops_sum += abs(candidate_centroid[k] - compared_position[k]);
                   }
@@ -217,6 +221,13 @@ namespace graphlab {
           }
           ASSERT_NE(min_hops_sum, 1000000);
           ASSERT_NE(centroid_proc, 65535);
+
+          std::cout << "Calculated centroid: (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
+          foreach(const procid_t& mirror, mirrors) {
+              std::cout << "(" << topologies[mirror][0] << "," << topologies[mirror][1] << "," << topologies[mirror][2] << "), ";
+          }
+
+
           mirrors2centroid_proc[mirrors] = centroid_proc;
           return centroid_proc;
       }
@@ -504,8 +515,7 @@ namespace graphlab {
 #endif
         for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = received_vids.begin();
              it != received_vids.end(); ++it) {
-//            const procid_t master = calculate_centroid_proc(it->second);
-            const procid_t master = 0;
+            const procid_t master = calculate_centroid_proc(it->second);
 #ifdef _OPENMP
             master_vids_mirrors.send(master, *it, omp_get_thread_num());
 #else
