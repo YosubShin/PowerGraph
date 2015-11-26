@@ -222,9 +222,9 @@ namespace graphlab {
           ASSERT_NE(min_hops_sum, 1000000);
           ASSERT_NE(centroid_proc, 65535);
 
-          std::cout << "Calculated centroid:" << centroid_proc << " (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
+          //// std::cout << "Calculated centroid:" << centroid_proc << " (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
           foreach(const procid_t& mirror, mirrors) {
-              std::cout << "(" << topologies[mirror][0] << "," << topologies[mirror][1] << "," << topologies[mirror][2] << "), ";
+              //// std::cout << "(" << topologies[mirror][0] << "," << topologies[mirror][1] << "," << topologies[mirror][2] << "), ";
           }
 
 
@@ -232,8 +232,8 @@ namespace graphlab {
           return centroid_proc;
       }
 
-    /** \brief Finalize completes the local graph data structure 
-     * and the vertex record information. 
+    /** \brief Finalize completes the local graph data structure
+     * and the vertex record information.
      *
      * \internal
      * The finalization goes through 5 steps:
@@ -241,12 +241,12 @@ namespace graphlab {
      * 1. Construct local graph using the received edges, during which
      * the vid2lvid map is built.
      *
-     * 2. Construct lvid2record map (of empty entries) using the received vertices. 
+     * 2. Construct lvid2record map (of empty entries) using the received vertices.
      *
-     * 3. Complete lvid2record map by exchanging the vertex_info. 
+     * 3. Complete lvid2record map by exchanging the vertex_info.
      *
-     * 4. Exchange the negotiation records, including singletons. (Local graph 
-     * handling singletons). 
+     * 4. Exchange the negotiation records, including singletons. (Local graph
+     * handling singletons).
      *
      * 5. Exchange global graph statistics.
      */
@@ -256,7 +256,7 @@ namespace graphlab {
 
       bool first_time_finalize = false;
       /**
-       * Fast pass for first time finalization. 
+       * Fast pass for first time finalization.
        */
       if (graph.is_dynamic()) {
         size_t nverts = graph.num_local_vertices();
@@ -274,10 +274,10 @@ namespace graphlab {
       typedef typename hopscotch_map<vertex_id_type, lvid_type>::value_type
         vid2lvid_pair_type;
 
-      typedef typename buffered_exchange<edge_buffer_record>::buffer_type 
+      typedef typename buffered_exchange<edge_buffer_record>::buffer_type
         edge_buffer_type;
 
-      typedef typename buffered_exchange<vertex_buffer_record>::buffer_type 
+      typedef typename buffered_exchange<vertex_buffer_record>::buffer_type
         vertex_buffer_type;
 
       /**
@@ -295,7 +295,7 @@ namespace graphlab {
 
       /**
        * \internal
-       * Bit field incidate the vertex that is updated during the ingress. 
+       * Bit field incidate the vertex that is updated during the ingress.
        */
       dense_bitset updated_lvids(graph.vid2lvid.size());
 
@@ -304,10 +304,10 @@ namespace graphlab {
       /*                       Flush any additional data                        */
       /*                                                                        */
       /**************************************************************************/
-      edge_exchange.flush(); vertex_exchange.flush();     
+      edge_exchange.flush(); vertex_exchange.flush();
 
       /**
-       * Fast pass for redundant finalization with no graph changes. 
+       * Fast pass for redundant finalization with no graph changes.
        */
       {
         size_t changed_size = edge_exchange.size() + vertex_exchange.size();
@@ -318,10 +318,10 @@ namespace graphlab {
         }
       }
 
-      if(rpc.procid() == 0)       
+      if(rpc.procid() == 0)
         memory_info::log_usage("Post Flush");
 
-     
+
       /**************************************************************************/
       /*                                                                        */
       /*                         Construct local graph                          */
@@ -330,7 +330,7 @@ namespace graphlab {
       { // Add all the edges to the local graph
         logstream(LOG_INFO) << "Graph Finalize: constructing local graph" << std::endl;
         const size_t nedges = edge_exchange.size()+1;
-        graph.local_graph.reserve_edge_space(nedges + 1);      
+        graph.local_graph.reserve_edge_space(nedges + 1);
         edge_buffer_type edge_buffer;
         procid_t proc;
         while(edge_exchange.recv(proc, edge_buffer)) {
@@ -373,7 +373,7 @@ namespace graphlab {
         }
 
         // Finalize local graph
-        logstream(LOG_INFO) << "Graph Finalize: finalizing local graph." 
+        logstream(LOG_INFO) << "Graph Finalize: finalizing local graph."
                             << std::endl;
         //TODO Make sure anything setup in local graph finalization is consistent with final master.
         graph.local_graph.finalize();
@@ -382,9 +382,9 @@ namespace graphlab {
                             << std::endl
                             << "\t nedges: " << graph.local_graph.num_edges()
                             << std::endl;
-        
+
         if(rpc.procid() == 0) {
-          memory_info::log_usage("Finished finalizing local graph."); 
+          memory_info::log_usage("Finished finalizing local graph.");
           // debug
           // std::cout << graph.local_graph << std::endl;
         }
@@ -403,7 +403,7 @@ namespace graphlab {
             //FIXME Check failing here because we are only using edge ingress
             ASSERT_TRUE(false);
             lvid_type lvid(-1);
-            std::cout << rec.vid << std::endl;
+            //// std::cout << rec.vid << std::endl;
             if (graph.vid2lvid.find(rec.vid) == graph.vid2lvid.end()) {
               if (vid2lvid_buffer.find(rec.vid) == vid2lvid_buffer.end()) {
                 lvid = lvid_start + vid2lvid_buffer.size();
@@ -446,7 +446,7 @@ namespace graphlab {
         }
         ASSERT_EQ(local_nverts, graph.local_graph.num_vertices());
         ASSERT_EQ(graph.lvid2record.size(), graph.local_graph.num_vertices());
-        if(rpc.procid() == 0)       
+        if(rpc.procid() == 0)
           memory_info::log_usage("Finihsed allocating lvid2record");
       }
 
@@ -531,12 +531,12 @@ namespace graphlab {
 #endif
             }
 
-            std::cout << "preliminary master proc " << rpc.procid() << " sends vid, mirrors pair for vertex " << it->first << " to master proc " << master << std::endl;
+            //// std::cout << "preliminary master proc " << rpc.procid() << " sends vid, mirrors pair for vertex " << it->first << " to master proc " << master << std::endl;
         }
         master_vids_mirrors.flush();
         vid_master_loc_buffer.flush();
         rpc.barrier();
-        std::cout << "Preliminary masters received vertices from mirrors and then forwarded mirror info to master, and also sent back new master information back to mirrors\n";
+        //// std::cout << "Preliminary masters received vertices from mirrors and then forwarded mirror info to master, and also sent back new master information back to mirrors\n";
 
         /**************************************************************************/
         /*                                                                        */
@@ -564,13 +564,13 @@ namespace graphlab {
                             local_mirrors |= mirrors;
                             local_mirrors.clear_bit(rpc.procid());
                             flying_vids_lock.unlock();
-                            std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " isn't in vid2lvid_buffer\n";
+                            //// std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " isn't in vid2lvid_buffer\n";
                         } else { // Master is part of the ingressed graph's mirror
                             lvid_type lvid = vid2lvid_buffer[vid];
                             graph.lvid2record[lvid]._mirrors |= mirrors;
                             graph.lvid2record[lvid]._mirrors.clear_bit(rpc.procid());
                             graph.lvid2record[lvid].owner = rpc.procid();
-                            std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " is in vid2lvid_buffer\n";
+                            //// std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " is in vid2lvid_buffer\n";
                         }
                     } else { // Master is one of the mirrors
                         lvid_type lvid = graph.vid2lvid[vid];
@@ -578,7 +578,7 @@ namespace graphlab {
                         graph.lvid2record[lvid]._mirrors.clear_bit(rpc.procid());
                         graph.lvid2record[lvid].owner = rpc.procid();
                         updated_lvids.set_bit(lvid);
-                        std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " is in graph.vid2lvid\n";
+                        //// std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " is in graph.vid2lvid\n";
                     }
                 }
             }
@@ -588,7 +588,7 @@ namespace graphlab {
         // reallocate spaces for the flying vertices.
         size_t vsize_old = graph.lvid2record.size();
         size_t vsize_new = vsize_old + flying_vids.size();
-        std::cout << "vsize_old: " << vsize_old << ", vsize_new: " << vsize_new << std::endl;
+        //// std::cout << "vsize_old: " << vsize_old << ", vsize_new: " << vsize_new << std::endl;
         graph.lvid2record.resize(vsize_new);
         graph.local_graph.resize(vsize_new);
         for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = flying_vids.begin();
@@ -599,11 +599,11 @@ namespace graphlab {
             graph.lvid2record[lvid].gvid = gvid;
             graph.lvid2record[lvid]._mirrors = it->second;
             vid2lvid_buffer[gvid] = lvid;
-            std::cout << "proc" << rpc.procid() << " is master for gvid " << gvid << " and creates new lvid " << lvid << std::endl;
+            //// std::cout << "proc" << rpc.procid() << " is master for gvid " << gvid << " and creates new lvid " << lvid << std::endl;
         }
 
         rpc.barrier();
-        std::cout << "Masters received mirror information and updated themselves\n";
+        //// std::cout << "Masters received mirror information and updated themselves\n";
 
 
         /**************************************************************************/
@@ -642,7 +642,7 @@ namespace graphlab {
                     lvid_type lvid = graph.vid2lvid[vid];
                     vertex_record& vrec = graph.lvid2record[lvid];
                     vrec.owner = procid_vid_pair.first;
-                    std::cout << "proc " << rpc.procid() << " receives vid " << vid << ", lvid " << lvid << " from prelim. master proc " << recvid << " to update its local view of master " << procid_vid_pair.first << std::endl;
+                    //// std::cout << "proc " << rpc.procid() << " receives vid " << vid << ", lvid " << lvid << " from prelim. master proc " << recvid << " to update its local view of master " << procid_vid_pair.first << std::endl;
                     ASSERT_EQ(graph.lvid2record[lvid].owner, procid_vid_pair.first);
                 }
             }
@@ -650,14 +650,14 @@ namespace graphlab {
 
         vid_master_loc_buffer.clear();
         rpc.barrier();
-        std::cout << "Mirrors received new master information\n";
+        //// std::cout << "Mirrors received new master information\n";
 
         } // end of master handshake
 
         rpc.full_barrier();
         for (lvid_type i = lvid_start; i < graph.lvid2record.size(); ++i) {
             vertex_record& vrec = graph.lvid2record[i];
-            std::cout << "proc " << rpc.procid() << ": vid(" << vrec.gvid << "), lvid(" << i << "), owner(" << vrec.owner <<  "), num_mirrors(" << vrec.num_mirrors() << ")\n";
+            //// std::cout << "proc " << rpc.procid() << ": vid(" << vrec.gvid << "), lvid(" << i << "), owner(" << vrec.owner <<  "), num_mirrors(" << vrec.num_mirrors() << ")\n";
         }
         rpc.full_barrier();
 
