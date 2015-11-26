@@ -141,7 +141,8 @@ distributed_control::distributed_control() {
         initparam.curmachineid,
         initparam.numhandlerthreads,
         initparam.commtype,
-        initparam.topologies);
+        initparam.topologies,
+        initparam.topologyaware);
   INITIALIZE_TRACER(dc_receive_queuing, "dc: time spent on enqueue");
   INITIALIZE_TRACER(dc_receive_multiplexing, "dc: time spent exploding a chunk");
   INITIALIZE_TRACER(dc_call_dispatch, "dc: time spent issuing RPC calls");
@@ -153,7 +154,8 @@ distributed_control::distributed_control(dc_init_param initparam) {
         initparam.curmachineid,
         initparam.numhandlerthreads,
         initparam.commtype,
-        initparam.topologies);
+        initparam.topologies
+        initparam.topologyaware);
   INITIALIZE_TRACER(dc_receive_queuing, "dc: time spent on enqueue");
   INITIALIZE_TRACER(dc_receive_multiplexing, "dc: time spent exploding a chunk");
   INITIALIZE_TRACER(dc_call_dispatch, "dc: time spent issuing RPC calls");
@@ -491,7 +493,8 @@ void distributed_control::init(const std::vector<std::string> &machines,
             procid_t curmachineid,
             size_t numhandlerthreads,
             dc_comm_type commtype,
-            std::vector<std::vector<int> > topologies) {
+            std::vector<std::vector<int> > topologies,
+            bool topologyaware) {
 
   if (numhandlerthreads == RPC_DEFAULT_NUMHANDLERTHREADS) {
     // autoconfigure
