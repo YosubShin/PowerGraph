@@ -712,8 +712,28 @@ namespace graphlab {
     void exchange_global_info () {
       // Count the number of vertices owned locally
       graph.local_own_nverts = 0;
-      foreach(const vertex_record& record, graph.lvid2record)
-        if(record.owner == rpc.procid()) ++graph.local_own_nverts;
+      foreach(const vertex_record& record, graph.lvid2record) {
+        if(record.owner == rpc.procid()) {
+            ++graph.local_own_nverts;
+            std::vector<int> master_coord = dc->topologies()[rpc.procid()];
+            uint64_t hops = 0;
+            foreach(const procid_t& mirror, record.mirrors()) {
+                std::vector<int> mirror_coord = dc->topologies()[mirror];
+                if (rpc.procid() == mirror) {
+                    // Same proc as master
+                    continue;
+                } else if (rpc.procid() != mirror && master_coord == mirror_coord) {
+                    // Different procs on same Gemini; Calculate as one hop
+                    ++hops;
+                } else {
+                    for (size_t i = 0; i < 3; ++i) {
+                        hops += abs(master_coord[i] - mirror_coord[i]);
+                    }
+                }
+            }
+            graph.local_master2mirror_hops += hops;
+        }
+      }
 
       // Finalize global graph statistics. 
       logstream(LOG_INFO)
@@ -739,6 +759,13 @@ namespace graphlab {
       graph.nreplicas = 0;
       foreach(size_t count, swap_counts) graph.nreplicas += count;
 
+        std::vector<uint64_t> swap_counts_uint64(rpc.numprocs());
+        // compute number of hops
+        swap_counts_uint64[rpc.procid()] = graph.local_master2mirror_hops;
+        rpc.all_gather(swap_counts_uint64);
+        graph.master2mirror_hops = 0;
+        foreach(uint64_t count, swap_counts_uint64) graph.master2mirror_hops += count;
+
 
       if (rpc.procid() == 0) {
         logstream(LOG_EMPH) << "Graph info: "  
@@ -746,6 +773,7 @@ namespace graphlab {
                             << "\n\t nedges: " << graph.num_edges()
                             << "\n\t nreplicas: " << graph.nreplicas
                             << "\n\t replication factor: " << (double)graph.nreplicas/graph.num_vertices()
+                            << "\n\t number of hops b/w master-mirrors: " << (double)graph.master2mirror_hops / graph.num_vertices()
                             << std::endl;
       }
     }

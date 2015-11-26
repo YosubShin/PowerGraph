@@ -292,8 +292,12 @@ int main(int argc, char** argv) {
     std::string ingress_method = "";
     clopts.get_graph_args().get_option("ingress", ingress_method);
 
-    // algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time
-    ofs << "pagerank," << ingress_method << "," << ITERATIONS << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << std::endl;
+    bool topology_aware = dc.topology_aware();
+
+    uint64_t num_master2mirror_hops = graph.num_master2mirror_hops();
+
+    // algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,master2mirror_hops
+    ofs << "pagerank," << ingress_method << "," << ITERATIONS << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << num_master2mirror_hops << std::endl;
 
     ofs.close();
 

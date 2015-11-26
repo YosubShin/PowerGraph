@@ -2679,6 +2679,8 @@ namespace graphlab {
      *\brief Get the number of vertices owned by this proc */
     size_t num_local_own_vertices() const { return local_own_nverts; }
 
+    uint64_t num_master2mirror_hops() const { return master2mirror_hops; }
+
     /** \internal
      *\brief Convert a global vid to a local vid */
     lvid_type local_vid (const vertex_id_type vid) const {
@@ -3157,6 +3159,10 @@ namespace graphlab {
 
     /** The number of vertices owned by this proc */
     size_t local_own_nverts;
+
+    uint64_t master2mirror_hops;
+
+    uint64_t local_master2mirror_hops;
 
     /** The global number of vertex replica */
     size_t nreplicas;
