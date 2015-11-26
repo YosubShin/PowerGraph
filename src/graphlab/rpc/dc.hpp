@@ -87,6 +87,8 @@ struct dc_init_param{
    */
   std::vector<std::vector<int> > topologies;
 
+  bool topology_aware = false;
+
   /** Additional construction options of the form
     "key1=value1,key2=value2".
 
@@ -239,6 +241,7 @@ class distributed_control{
   dense_bitset fcall_handler_blockers;
 
   std::vector<std::vector<int> > topologies_;
+  bool topology_aware_;
 
   struct fcallqueue_entry {
     std::vector<function_call_block> calls;
@@ -320,6 +323,10 @@ class distributed_control{
 
   const std::vector<std::vector<int> > topologies() const {
     return topologies_;
+  }
+
+  const bool topology_aware() const {
+      return topology_aware_;
   }
 
   // The procid of the last distributed_control object created

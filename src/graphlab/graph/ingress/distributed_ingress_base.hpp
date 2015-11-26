@@ -515,7 +515,12 @@ namespace graphlab {
 #endif
         for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = received_vids.begin();
              it != received_vids.end(); ++it) {
-            const procid_t master = calculate_centroid_proc(it->second);
+            const procid_t master;
+            if (rpc.dc().topology_aware()) {
+                master = calculate_centroid_proc(it->second);
+            } else {
+                master = graph_hash::hash_vertex(it->first) % rpc.numprocs();
+            }
 #ifdef _OPENMP
             master_vids_mirrors.send(master, *it, omp_get_thread_num());
 #else

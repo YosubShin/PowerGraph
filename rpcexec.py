@@ -225,6 +225,7 @@ if topologyaware == 1:
   f.close()
 
   custom_environments += ' TOPOLOGIES_FILE=%s/topologies' % project_home
+  custom_environments += ' TOPOLOGY_AWARE=1 '
 
 # the commands to run to start for each node
 cmd = [None] * nmachines
