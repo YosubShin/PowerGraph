@@ -715,10 +715,10 @@ namespace graphlab {
       foreach(const vertex_record& record, graph.lvid2record) {
         if(record.owner == rpc.procid()) {
             ++graph.local_own_nverts;
-            std::vector<int> master_coord = dc->topologies()[rpc.procid()];
+            std::vector<int> master_coord = rpc.dc().topologies()[rpc.procid()];
             uint64_t hops = 0;
             foreach(const procid_t& mirror, record.mirrors()) {
-                std::vector<int> mirror_coord = dc->topologies()[mirror];
+                std::vector<int> mirror_coord = rpc.dc().topologies()[mirror];
                 if (rpc.procid() == mirror) {
                     // Same proc as master
                     continue;
