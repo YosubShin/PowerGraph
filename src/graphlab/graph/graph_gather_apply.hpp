@@ -34,6 +34,7 @@
 #include <graphlab/rpc/buffered_exchange.hpp>
 
 #include <graphlab/macros_def.hpp>
+#include <iostream>
 
 namespace graphlab {
   template<typename Graph, typename GatherType>
@@ -556,6 +557,9 @@ namespace graphlab {
     typename gather_exchange_type::buffer_type buffer;
     while(gather_exchange.recv(procid, buffer, try_to_recv)) {
       foreach(const vid_gather_pair_type& pair, buffer) {
+        if (graph.vid2lvid.find(pair.first) == graph.vid2lvid.end()) {
+          std::cout << "In proc" << procid << ": graph.vid2lvid for vid" << pair.first << " does not exists.\n";
+        }
         ASSERT_TRUE(graph.vid2lvid.find(pair.first) != graph.vid2lvid.end());
         const lvid_type lvid = graph.local_vid(pair.first);
         const gather_type& accum = pair.second;
