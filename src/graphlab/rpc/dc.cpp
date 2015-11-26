@@ -154,7 +154,7 @@ distributed_control::distributed_control(dc_init_param initparam) {
         initparam.curmachineid,
         initparam.numhandlerthreads,
         initparam.commtype,
-        initparam.topologies
+        initparam.topologies,
         initparam.topologyaware);
   INITIALIZE_TRACER(dc_receive_queuing, "dc: time spent on enqueue");
   INITIALIZE_TRACER(dc_receive_multiplexing, "dc: time spent exploding a chunk");
