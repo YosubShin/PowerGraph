@@ -608,7 +608,7 @@ void distributed_control::init(const std::vector<std::string> &machines,
   last_dc_procid = localprocid;
 
   topologies_ = topologies;
-  topology_aware_ = topology_aware;
+  topology_aware_ = topologyaware;
   if (procid() == 0) {
     ASSERT_GT(topologies_.size(), 0);
     for (size_t i = 0; i < topologies_.size(); ++i) {

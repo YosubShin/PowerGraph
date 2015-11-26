@@ -87,7 +87,7 @@ struct dc_init_param{
    */
   std::vector<std::vector<int> > topologies;
 
-  bool topology_aware = false;
+  bool topologyaware = false;
 
   /** Additional construction options of the form
     "key1=value1,key2=value2".
