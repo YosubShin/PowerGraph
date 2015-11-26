@@ -605,10 +605,12 @@ namespace graphlab {
             procid_t recvid;
             while(vid_master_loc_buffer.recv(recvid, n_buffer)) {
                 foreach(const procid_vid_pair_type procid_vid_pair, n_buffer) {
-                    vertex_record& vrec = graph.lvid2record[graph.vid2lvid[procid_vid_pair.second]];
+                    vertex_id_type vid = procid_vid_pair.second;
+                    lvid_type lvid = graph.vid2lvid[vid];
+                    vertex_record& vrec = graph.lvid2record[lvid];
                     vrec.owner = procid_vid_pair.first;
-                    std::cout << "proc " << rpc.procid() << " receives vid " << procid_vid_pair.second << " from preliminary master proc " << recvid << " to update its local view of master " << procid_vid_pair.first << std::endl;
-                    ASSERT_EQ(graph.lvid2record[graph.vid2lvid[procid_vid_pair.second]].owner, procid_vid_pair.first);
+                    std::cout << "proc " << rpc.procid() << " receives vid " << vid << ", lvid " << lvid << " from prelim. master proc " << recvid << " to update its local view of master " << procid_vid_pair.first << std::endl;
+                    ASSERT_EQ(graph.lvid2record[lvid].owner, procid_vid_pair.first);
                 }
             }
         }
@@ -622,7 +624,7 @@ namespace graphlab {
         rpc.full_barrier();
         for (lvid_type i = lvid_start; i < graph.lvid2record.size(); ++i) {
             vertex_record& vrec = graph.lvid2record[i];
-            std::cout << "proc " << rpc.procid() << ": vid(" << vrec.gvid << "), owner(" << vrec.owner <<  "), num_mirrors(" << vrec.num_mirrors() << ")\n";
+            std::cout << "proc " << rpc.procid() << ": vid(" << vrec.gvid << "), lvid(" << i << "), owner(" << vrec.owner <<  "), num_mirrors(" << vrec.num_mirrors() << ")\n";
         }
         rpc.full_barrier();
 
