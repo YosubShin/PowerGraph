@@ -209,7 +209,8 @@ namespace graphlab {
                   ASSERT_EQ(candidate_centroid.size(), 3);
                   ASSERT_EQ(compared_position.size(), 3);
                   for (size_t k = 0; k < candidate_centroid.size(); ++k) {
-                      hops_sum += abs(candidate_centroid[k] - compared_position[k]);
+                      int dist = abs(candidate_centroid[k] - compared_position[k]);
+                      hops_sum += std::max(dist, 23 - dist);
                   }
               }
 
@@ -728,7 +729,8 @@ namespace graphlab {
                     ++hops;
                 } else {
                     for (size_t i = 0; i < 3; ++i) {
-                        hops += abs(master_coord[i] - mirror_coord[i]);
+                        int dist = abs(master_coord[i] - mirror_coord[i]);
+                        hops += std::max(dist, 23 - dist);
                     }
                 }
                 std::cout << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << ") to "
