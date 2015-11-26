@@ -202,7 +202,7 @@ namespace graphlab {
           for (size_t i = 0; i < topologies.size(); ++i) {
               std::vector<int> candidate_centroid = topologies[i];
               int hops_sum = 0;
-              for (size_t j = 0; j < topologies.size(); ++j) {
+              foreach(const procid_t& j, mirrors) {
                   if (i == j) {
                       continue;
                   }
@@ -222,7 +222,7 @@ namespace graphlab {
           ASSERT_NE(min_hops_sum, 1000000);
           ASSERT_NE(centroid_proc, 65535);
 
-          std::cout << "Calculated centroid: (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
+          std::cout << "Calculated centroid:" << centroid_proc << " (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
           foreach(const procid_t& mirror, mirrors) {
               std::cout << "(" << topologies[mirror][0] << "," << topologies[mirror][1] << "," << topologies[mirror][2] << "), ";
           }
