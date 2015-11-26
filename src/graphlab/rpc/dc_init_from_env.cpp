@@ -39,7 +39,7 @@ bool init_param_from_env(dc_init_param& param) {
   param.curmachineid = atoi(nodeid);
 
   char* topologyaware = getenv("TOPOLOGY_AWARE");
-  param.topology_aware = topologyaware != NULL;
+  param.topologyaware = topologyaware != NULL;
 
   char* nodes = getenv("SPAWNNODES");
   std::string nodesstr = nodes;
