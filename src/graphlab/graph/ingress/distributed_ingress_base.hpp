@@ -592,6 +592,26 @@ namespace graphlab {
         rpc.barrier();
         std::cout << "Masters received mirror information and updated themselves\n";
 
+
+        /**************************************************************************/
+        /*                                                                        */
+        /*                        Merge in vid2lvid_buffer                        */
+        /*                                                                        */
+        /**************************************************************************/
+        {
+            if (graph.vid2lvid.size() == 0) {
+                graph.vid2lvid.swap(vid2lvid_buffer);
+            } else {
+                graph.vid2lvid.rehash(graph.vid2lvid.size() + vid2lvid_buffer.size());
+                foreach (const typename vid2lvid_map_type::value_type& pair, vid2lvid_buffer) {
+                    graph.vid2lvid.insert(pair);
+                }
+                vid2lvid_buffer.clear();
+                // vid2lvid_buffer.swap(vid2lvid_map_type(-1));
+            }
+            ASSERT_EQ(graph.lvid2record.size(), graph.vid2lvid.size());
+        }
+
         /**************************************************************************/
         /*                                                                        */
         /* Mirrors receive new master information and updates its local master proc info  */
@@ -628,25 +648,6 @@ namespace graphlab {
         }
         rpc.full_barrier();
 
-      /**************************************************************************/
-      /*                                                                        */
-      /*                        Merge in vid2lvid_buffer                        */
-      /*                                                                        */
-      /**************************************************************************/
-      {
-        if (graph.vid2lvid.size() == 0) {
-          graph.vid2lvid.swap(vid2lvid_buffer);
-        } else {
-          graph.vid2lvid.rehash(graph.vid2lvid.size() + vid2lvid_buffer.size());
-          foreach (const typename vid2lvid_map_type::value_type& pair, vid2lvid_buffer) {
-            graph.vid2lvid.insert(pair);
-          }
-          vid2lvid_buffer.clear();
-          // vid2lvid_buffer.swap(vid2lvid_map_type(-1));
-        }
-      }
-
-      ASSERT_EQ(graph.lvid2record.size(), graph.vid2lvid.size());
 
         /**************************************************************************/
       /*                                                                        */
