@@ -552,17 +552,20 @@ namespace graphlab {
                             flying_vids_lock.lock();
                             mirror_type& local_mirrors = flying_vids[vid];
                             local_mirrors |= mirrors;
+                            local_mirrors.clear_bit(rpc.procid());
                             flying_vids_lock.unlock();
                             std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " isn't in vid2lvid_buffer\n";
                         } else { // Master is part of the ingressed graph's mirror
                             lvid_type lvid = vid2lvid_buffer[vid];
                             graph.lvid2record[lvid]._mirrors |= mirrors;
+                            graph.lvid2record[lvid]._mirrors.clear_bit(rpc.procid());
                             graph.lvid2record[lvid].owner = rpc.procid();
                             std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " is in vid2lvid_buffer\n";
                         }
                     } else { // Master is one of the mirrors
                         lvid_type lvid = graph.vid2lvid[vid];
                         graph.lvid2record[lvid]._mirrors |= mirrors;
+                        graph.lvid2record[lvid]._mirrors.clear_bit(rpc.procid());
                         graph.lvid2record[lvid].owner = rpc.procid();
                         updated_lvids.set_bit(lvid);
                         std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " is in graph.vid2lvid\n";
