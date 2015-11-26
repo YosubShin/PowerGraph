@@ -625,8 +625,6 @@ namespace graphlab {
         }
         rpc.full_barrier();
 
-        ASSERT_EQ(graph.lvid2record.size(), graph.vid2lvid.size());
-
       /**************************************************************************/
       /*                                                                        */
       /*                        Merge in vid2lvid_buffer                        */
@@ -645,8 +643,9 @@ namespace graphlab {
         }
       }
 
+      ASSERT_EQ(graph.lvid2record.size(), graph.vid2lvid.size());
 
-      /**************************************************************************/
+        /**************************************************************************/
       /*                                                                        */
       /*              synchronize vertex data and meta information              */
       /*                                                                        */
