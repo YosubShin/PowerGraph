@@ -142,16 +142,17 @@ namespace graphlab {
       vertex_exchange(dc), edge_exchange(dc),
 #endif
       edge_decision(dc) {
-        std::vector<std::vector<int> > topologies = rpc.dc().topologies();
-        ASSERT_GT(topologies.size(), 0);
+        if (rpc.dc().topology_aware()) {
+            std::vector<std::vector<int> > topologies = rpc.dc().topologies();
+            ASSERT_GT(topologies.size(), 0);
 
-        for (size_t i = 0; i < topologies.size(); ++i) {
-            if (topology2proc.find(topologies[i]) == topology2proc.end()) {
-                topology2proc[topologies[i]] = (unsigned short) i;
+            for (size_t i = 0; i < topologies.size(); ++i) {
+                if (topology2proc.find(topologies[i]) == topology2proc.end()) {
+                    topology2proc[topologies[i]] = (unsigned short) i;
+                }
             }
         }
-
-
+        
       rpc.barrier();
     } // end of constructor
 
