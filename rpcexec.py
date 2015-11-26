@@ -198,33 +198,33 @@ for i in range(nmachines):
 #endfor
 f.close()
 
+topologies = [''] * nmachines
+for i in range(nmachines):
+  nid = int(machines[i][3:])  # extract 1234 out of 'nid01234'
+  topology = subprocess.Popen(["rca-helper", "-C", str(nid)], stdout=subprocess.PIPE).communicate()[0].strip()
+  topologies[i] = topology
+#endfor
+try:
+  f = open('%s/topologies' % project_home, 'w')
+except:
+  print
+  print("Unable to open topologies file")
+  print
+  exit(0)
+#endtry
+
+try:
+  f.write('\n'.join(topologies))
+except:
+  print
+  print("Unable to write topologies file")
+  print
+  exit(0)
+
+f.close()
+custom_environments += ' TOPOLOGIES_FILE=%s/topologies' % project_home
+
 if topologyaware == 1:
-  topologies = [''] * nmachines
-  for i in range(nmachines):
-    nid = int(machines[i][3:])  # extract 1234 out of 'nid01234'
-    topology = subprocess.Popen(["rca-helper", "-C", str(nid)], stdout=subprocess.PIPE).communicate()[0].strip()
-    topologies[i] = topology
-  #endfor
-  try:
-    f = open('%s/topologies' % project_home, 'w')
-  except:
-    print
-    print("Unable to open topologies file")
-    print
-    exit(0)
-  #endtry
-
-  try:
-    f.write('\n'.join(topologies))
-  except:
-    print
-    print("Unable to write topologies file")
-    print
-    exit(0)
-
-  f.close()
-
-  custom_environments += ' TOPOLOGIES_FILE=%s/topologies' % project_home
   custom_environments += ' TOPOLOGY_AWARE=1 '
 
 # the commands to run to start for each node
