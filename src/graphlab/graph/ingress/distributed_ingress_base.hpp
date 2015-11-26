@@ -515,7 +515,7 @@ namespace graphlab {
 #endif
         for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = received_vids.begin();
              it != received_vids.end(); ++it) {
-            const procid_t master;
+            procid_t master = 0;
             if (rpc.dc().topology_aware()) {
                 master = calculate_centroid_proc(it->second);
             } else {
@@ -715,7 +715,7 @@ namespace graphlab {
       foreach(const vertex_record& record, graph.lvid2record) {
         if(record.owner == rpc.procid()) {
             ++graph.local_own_nverts;
-            std::vector<int> master_coord = dc->topologies()[rpc.procid()];
+            std::vector<int> master_coord = dc.topologies()[rpc.procid()];
             uint64_t hops = 0;
             foreach(const procid_t& mirror, record.mirrors()) {
                 std::vector<int> mirror_coord = dc->topologies()[mirror];
