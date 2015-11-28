@@ -222,9 +222,9 @@ namespace graphlab {
           ASSERT_NE(min_hops_sum, 1000000);
           ASSERT_NE(centroid_proc, 65535);
 
-          std::cout << "Calculated centroid:" << centroid_proc << " (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
+        ////  std::cout << "Calculated centroid:" << centroid_proc << " (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
           foreach(const procid_t& mirror, mirrors) {
-              std::cout << "(" << topologies[mirror][0] << "," << topologies[mirror][1] << "," << topologies[mirror][2] << "), ";
+            ////  std::cout << "(" << topologies[mirror][0] << "," << topologies[mirror][1] << "," << topologies[mirror][2] << "), ";
           }
 
 
@@ -403,7 +403,7 @@ namespace graphlab {
             //FIXME Check failing here because we are only using edge ingress
             ASSERT_TRUE(false);
             lvid_type lvid(-1);
-            std::cout << rec.vid << std::endl;
+          ////  std::cout << rec.vid << std::endl;
             if (graph.vid2lvid.find(rec.vid) == graph.vid2lvid.end()) {
               if (vid2lvid_buffer.find(rec.vid) == vid2lvid_buffer.end()) {
                 lvid = lvid_start + vid2lvid_buffer.size();
@@ -536,12 +536,12 @@ namespace graphlab {
 #endif
             }
 
-            std::cout << "preliminary master proc " << rpc.procid() << " sends vid, mirrors pair for vertex " << it->first << " to master proc " << master << std::endl;
+          ////  std::cout << "preliminary master proc " << rpc.procid() << " sends vid, mirrors pair for vertex " << it->first << " to master proc " << master << std::endl;
         }
         master_vids_mirrors.flush();
         vid_master_loc_buffer.flush();
         rpc.barrier();
-        std::cout << "Preliminary masters received vertices from mirrors and then forwarded mirror info to master, and also sent back new master information back to mirrors\n";
+      ////  std::cout << "Preliminary masters received vertices from mirrors and then forwarded mirror info to master, and also sent back new master information back to mirrors\n";
 
         /**************************************************************************/
         /*                                                                        */
@@ -569,13 +569,13 @@ namespace graphlab {
                             local_mirrors |= mirrors;
                             local_mirrors.clear_bit(rpc.procid());
                             flying_vids_lock.unlock();
-                            std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " isn't in vid2lvid_buffer\n";
+                          ////  std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " isn't in vid2lvid_buffer\n";
                         } else { // Master is part of the ingressed graph's mirror
                             lvid_type lvid = vid2lvid_buffer[vid];
                             graph.lvid2record[lvid]._mirrors |= mirrors;
                             graph.lvid2record[lvid]._mirrors.clear_bit(rpc.procid());
                             graph.lvid2record[lvid].owner = rpc.procid();
-                            std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " is in vid2lvid_buffer\n";
+                          ////  std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " is in vid2lvid_buffer\n";
                         }
                     } else { // Master is one of the mirrors
                         lvid_type lvid = graph.vid2lvid[vid];
@@ -583,7 +583,7 @@ namespace graphlab {
                         graph.lvid2record[lvid]._mirrors.clear_bit(rpc.procid());
                         graph.lvid2record[lvid].owner = rpc.procid();
                         updated_lvids.set_bit(lvid);
-                        std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " is in graph.vid2lvid\n";
+                      ////  std::cout << "proc" << rpc.procid() << ": master for vid" << vid << " is in graph.vid2lvid\n";
                     }
                 }
             }
@@ -593,7 +593,7 @@ namespace graphlab {
         // reallocate spaces for the flying vertices.
         size_t vsize_old = graph.lvid2record.size();
         size_t vsize_new = vsize_old + flying_vids.size();
-        std::cout << "vsize_old: " << vsize_old << ", vsize_new: " << vsize_new << std::endl;
+      ////  std::cout << "vsize_old: " << vsize_old << ", vsize_new: " << vsize_new << std::endl;
         graph.lvid2record.resize(vsize_new);
         graph.local_graph.resize(vsize_new);
         for (typename boost::unordered_map<vertex_id_type, mirror_type>::iterator it = flying_vids.begin();
@@ -604,11 +604,11 @@ namespace graphlab {
             graph.lvid2record[lvid].gvid = gvid;
             graph.lvid2record[lvid]._mirrors = it->second;
             vid2lvid_buffer[gvid] = lvid;
-            std::cout << "proc" << rpc.procid() << " is master for gvid " << gvid << " and creates new lvid " << lvid << std::endl;
+          ////  std::cout << "proc" << rpc.procid() << " is master for gvid " << gvid << " and creates new lvid " << lvid << std::endl;
         }
 
         rpc.barrier();
-        std::cout << "Masters received mirror information and updated themselves\n";
+      ////  std::cout << "Masters received mirror information and updated themselves\n";
 
 
         /**************************************************************************/
@@ -647,7 +647,7 @@ namespace graphlab {
                     lvid_type lvid = graph.vid2lvid[vid];
                     vertex_record& vrec = graph.lvid2record[lvid];
                     vrec.owner = procid_vid_pair.first;
-                    std::cout << "proc " << rpc.procid() << " receives vid " << vid << ", lvid " << lvid << " from prelim. master proc " << recvid << " to update its local view of master " << procid_vid_pair.first << std::endl;
+                  ////  std::cout << "proc " << rpc.procid() << " receives vid " << vid << ", lvid " << lvid << " from prelim. master proc " << recvid << " to update its local view of master " << procid_vid_pair.first << std::endl;
                     ASSERT_EQ(graph.lvid2record[lvid].owner, procid_vid_pair.first);
                 }
             }
@@ -655,14 +655,14 @@ namespace graphlab {
 
         vid_master_loc_buffer.clear();
         rpc.barrier();
-        std::cout << "Mirrors received new master information\n";
+      ////  std::cout << "Mirrors received new master information\n";
 
         } // end of master handshake
 
         rpc.full_barrier();
         for (lvid_type i = lvid_start; i < graph.lvid2record.size(); ++i) {
             vertex_record& vrec = graph.lvid2record[i];
-            std::cout << "proc " << rpc.procid() << ": vid(" << vrec.gvid << "), lvid(" << i << "), owner(" << vrec.owner <<  "), num_mirrors(" << vrec.num_mirrors() << ")\n";
+          ////  std::cout << "proc " << rpc.procid() << ": vid(" << vrec.gvid << "), lvid(" << i << "), owner(" << vrec.owner <<  "), num_mirrors(" << vrec.num_mirrors() << ")\n";
         }
         rpc.full_barrier();
 
@@ -733,12 +733,12 @@ namespace graphlab {
                         hops += std::min(dist, 23 - dist);
                     }
                 }
-                std::cout << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << ") to "
+              ////  std::cout << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << ") to "
                           << "(" << mirror_coord[0] << "," << mirror_coord[1] << "," << mirror_coord[2] << "): " << hops << " hops\n";
                 hops_sum += hops;
             }
             graph.local_master2mirror_hops += hops_sum;
-            std::cout << "vid" << record.gvid << " with master " << record.owner << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << "): total hops: " << hops_sum << std::endl;
+          ////  std::cout << "vid" << record.gvid << " with master " << record.owner << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << "): total hops: " << hops_sum << std::endl;
         }
       }
 
