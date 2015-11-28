@@ -773,6 +773,20 @@ namespace graphlab {
         graph.master2mirror_hops = 0;
         foreach(uint64_t count, swap_counts_uint64) graph.master2mirror_hops += count;
 
+        std::cout << "At proc" << rpc.procid() << ": number of master vertices is " << graph.local_own_nverts << std::endl;
+
+        // Average number of local master vertices
+        swap_counts_uint64[rpc.procid()] = graph.local_own_nverts;
+        rpc.all_gather(swap_counts_uint64);
+        graph.average_local_own_nverts = 0;
+        foreach(uint64_t count, swap_counts_uint64) graph.average_local_own_nverts += count;
+        graph.average_local_own_nverts = (double) graph.average_local_own_nverts / rpc.numprocs();
+
+        // Variance of number of local master vertices
+        swap_counts_uint64[rpc.procid()] = std::pow((graph.local_own_nverts - graph.average_local_own_nverts), 2);
+        rpc.all_gather(swap_counts_uint64);
+        graph.variance_local_own_nverts = 0;
+        foreach(uint64_t count, swap_counts_uint64) graph.variance_local_own_nverts += count;
 
       if (rpc.procid() == 0) {
         logstream(LOG_EMPH) << "Graph info: "  
@@ -781,6 +795,8 @@ namespace graphlab {
                             << "\n\t nreplicas: " << graph.nreplicas
                             << "\n\t replication factor: " << (double)graph.nreplicas/graph.num_vertices()
                             << "\n\t number of hops b/w master-mirrors: " << (double)graph.master2mirror_hops / graph.num_vertices()
+                            << "\n\t average number of local master vertices: " << graph.average_local_own_nverts
+                            << "\n\t variance of number of local master vertices: " << graph.variacne_local_own_nverts
                             << std::endl;
       }
     }

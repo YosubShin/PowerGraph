@@ -2681,6 +2681,10 @@ namespace graphlab {
 
     uint64_t num_master2mirror_hops() const { return master2mirror_hops; }
 
+      double average_num_local_own_vertices() const { return average_local_own_nverts; }
+
+      double variance_num_local_own_vertices() const { return variance_local_own_nverts; }
+
     /** \internal
      *\brief Convert a global vid to a local vid */
     lvid_type local_vid (const vertex_id_type vid) const {
@@ -3163,6 +3167,10 @@ namespace graphlab {
     uint64_t master2mirror_hops;
 
     uint64_t local_master2mirror_hops;
+
+      double average_local_own_nverts;
+
+      double variance_local_own_nverts;
 
     /** The global number of vertex replica */
     size_t nreplicas;
