@@ -129,8 +129,7 @@ namespace graphlab {
       }
     };
 
-    std::map<std::vector<int>, procid_t> topology2proc;
-    boost::unordered_map<mirror_type, procid_t, mirror_hash> mirrors2centroid_proc;
+    boost::unordered_map<mirror_type, std::vector<procid_t>, mirror_hash> mirrors2centroid_procs;
 
   public:
     distributed_ingress_base(distributed_control& dc, graph_type& graph) :
@@ -144,12 +143,6 @@ namespace graphlab {
       edge_decision(dc) {
         std::vector<std::vector<int> > topologies = rpc.dc().topologies();
         ASSERT_GT(topologies.size(), 0);
-
-        for (size_t i = 0; i < topologies.size(); ++i) {
-            if (topology2proc.find(topologies[i]) == topology2proc.end()) {
-                topology2proc[topologies[i]] = (unsigned short) i;
-            }
-        }
 
       rpc.barrier();
     } // end of constructor
@@ -188,15 +181,17 @@ namespace graphlab {
       vertex_combine_strategy = combine_strategy;
     }
 
-      procid_t calculate_centroid_proc(const mirror_type& mirrors) {
+      procid_t calculate_centroid_proc(vertex_id_type vid, const mirror_type& mirrors) {
+          std::vector<procid_t> centroid_procs;
+
           // Look for cached proc_id
-          if (mirrors2centroid_proc.find(mirrors) != mirrors2centroid_proc.end()) {
-              return mirrors2centroid_proc[mirrors];
+          if (mirrors2centroid_procs.find(mirrors) != mirrors2centroid_procs.end()) {
+              centroid_procs =  mirrors2centroid_procs[mirrors];
+              return centroid_procs[graph_hash::hash_vertex(vid) % centroid_procs.size()];
           }
 
           std::vector<std::vector<int> > topologies = rpc.dc().topologies();
           int min_hops_sum = 1000000;
-          procid_t centroid_proc = 65535;
 
           for (size_t i = 0; i < topologies.size(); ++i) {
               std::vector<int> candidate_centroid = topologies[i];
@@ -216,11 +211,14 @@ namespace graphlab {
 
               if (hops_sum < min_hops_sum) {
                   min_hops_sum = hops_sum;
-                  centroid_proc = (procid_t) i;
+                  centroid_procs.clear();
+                  centroid_procs.push_back(i);
+              } else if (hops_sum == min_hops_sum) {
+                  centroid_procs.push_back(i);
               }
           }
           ASSERT_NE(min_hops_sum, 1000000);
-          ASSERT_NE(centroid_proc, 65535);
+          ASSERT_FALSE(centroid_procs.empty());
 
         ////  std::cout << "Calculated centroid:" << centroid_proc << " (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
           foreach(const procid_t& mirror, mirrors) {
@@ -228,8 +226,8 @@ namespace graphlab {
           }
 
 
-          mirrors2centroid_proc[mirrors] = centroid_proc;
-          return centroid_proc;
+          mirrors2centroid_procs[mirrors] = centroid_procs;
+          return centroid_procs[graph_hash::hash_vertex(vid) % centroid_procs.size()];
       }
 
     /** \brief Finalize completes the local graph data structure
@@ -517,7 +515,7 @@ namespace graphlab {
              it != received_vids.end(); ++it) {
             procid_t master = 0;
             if (rpc.dc().topology_aware()) {
-                master = calculate_centroid_proc(it->second);
+                master = calculate_centroid_proc(it->first, it->second);
             } else {
                 master = graph_hash::hash_vertex(it->first) % rpc.numprocs();
             }
