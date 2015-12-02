@@ -191,11 +191,11 @@ namespace graphlab {
           }
 
           std::vector<std::vector<int> > topologies = rpc.dc().topologies();
-          int smallest_max_hops = 1000000;
+          int min_hops_sum = 1000000;
 
           for (size_t i = 0; i < topologies.size(); ++i) {
-              int max_hop = 0;
               std::vector<int> candidate_centroid = topologies[i];
+              int hops_sum = 0;
               foreach(const procid_t& j, mirrors) {
                   if (i == j) {
                       continue;
@@ -203,25 +203,21 @@ namespace graphlab {
                   std::vector<int> compared_position = topologies[j];
                   ASSERT_EQ(candidate_centroid.size(), 3);
                   ASSERT_EQ(compared_position.size(), 3);
-                  int hops_sum = 0;
                   for (size_t k = 0; k < candidate_centroid.size(); ++k) {
                       int dist = abs(candidate_centroid[k] - compared_position[k]);
                       hops_sum += std::min(dist, 23 - dist);
                   }
-                  if (hops_sum > max_hop) {
-                      max_hop = hops_sum;
-                  }
               }
 
-              if (max_hop < smallest_max_hops) {
-                  smallest_max_hops = max_hop;
+              if (hops_sum < min_hops_sum) {
+                  min_hops_sum = hops_sum;
                   centroid_procs.clear();
                   centroid_procs.push_back(i);
-              } else if (max_hop == smallest_max_hops) {
+              } else if (hops_sum == min_hops_sum) {
                   centroid_procs.push_back(i);
               }
           }
-          ASSERT_NE(smallest_max_hops, 1000000);
+          ASSERT_NE(min_hops_sum, 1000000);
           ASSERT_FALSE(centroid_procs.empty());
 
         ////  std::cout << "Calculated centroid:" << centroid_proc << " (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
