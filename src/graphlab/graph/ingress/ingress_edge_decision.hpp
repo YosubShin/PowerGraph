@@ -144,15 +144,14 @@ namespace graphlab {
          size_t minedges = *std::min_element(proc_num_edges.begin(), proc_num_edges.end());
          size_t maxedges = *std::max_element(proc_num_edges.begin(), proc_num_edges.end());
 
-
-         const std::vector<int>& src_coord = dc_.topologies()[graph_hash::hash_vertex(source) % dc_.numprocs()];
-         const std::vector<int>& dst_coord = dc_.topologies()[graph_hash::hash_vertex(target) % dc_.numprocs()];
+         ASSERT_EQ(dc_.topologies().size(), numprocs);
+         const std::vector<int>& src_coord = dc_.topologies()[graph_hash::hash_vertex(source) % numprocs];
+         const std::vector<int>& dst_coord = dc_.topologies()[graph_hash::hash_vertex(target) % numprocs];
          size_t shortest_dist = 0;
          ASSERT_EQ(src_coord.size(), 3);
          for (size_t i = 0; i < src_coord.size(); ++i) {
              shortest_dist += std::abs(src_coord[i] - dst_coord[i]);
          }
-         ASSERT_EQ(dc_.topologies().size(), numprocs);
          for (size_t i = 0; i < numprocs; ++i) {
              size_t sd = src_degree.get(i) + (usehash && (source % numprocs == i));
              size_t td = dst_degree.get(i) + (usehash && (target % numprocs == i));
