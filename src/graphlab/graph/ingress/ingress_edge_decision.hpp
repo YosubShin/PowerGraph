@@ -164,8 +164,8 @@ namespace graphlab {
              }
              double bal = (maxedges - proc_num_edges[i])/(epsilon + maxedges - minedges);
              proc_score[i] = bal + ((sd > 0) + (td > 0)) // original terms (load balance + greedy)
-                     + (shortest_dist - (src_dist + dst_dist) / 2.0) / (shortest_dist / 2.0) // minimize src_dist + dst_dist
-                     + (shortest_dist - std::abs(src_dist - dst_dist)) / (double) shortest_dist; // minimize src_dist and dst_dist difference
+                     + (shortest_dist - (src_dist + dst_dist) / 2.0) / ((epsilon + shortest_dist) / 2.0) // minimize src_dist + dst_dist
+                     + (shortest_dist - std::abs(src_dist - dst_dist)) / (epsilon + shortest_dist); // minimize src_dist and dst_dist difference
          }
          maxscore = *std::max_element(proc_score.begin(), proc_score.end());
 
