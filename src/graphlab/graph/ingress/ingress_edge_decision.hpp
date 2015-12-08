@@ -145,8 +145,8 @@ namespace graphlab {
          size_t maxedges = *std::max_element(proc_num_edges.begin(), proc_num_edges.end());
 
          ASSERT_EQ(dc_.topologies().size(), numprocs);
-         const std::vector<int>& src_coord = dc_.topologies()[graph_hash::hash_vertex(source) % numprocs];
-         const std::vector<int>& dst_coord = dc_.topologies()[graph_hash::hash_vertex(target) % numprocs];
+         std::vector<int> src_coord = dc_.topologies()[graph_hash::hash_vertex(source) % numprocs];
+         std::vector<int> dst_coord = dc_.topologies()[graph_hash::hash_vertex(target) % numprocs];
          size_t shortest_dist = 0;
          if (src_coord.size() != 3) {
              std::cout << "numprocs: " << numprocs << std::endl;
