@@ -148,15 +148,17 @@ namespace graphlab {
          const std::vector<int>& src_coord = dc_.topologies()[graph_hash::hash_vertex(source) % dc_.numprocs()];
          const std::vector<int>& dst_coord = dc_.topologies()[graph_hash::hash_vertex(target) % dc_.numprocs()];
          size_t shortest_dist = 0;
-         for (size_t i = 0; i < 3; ++i) {
+         ASSERT_EQ(src_coord.size(), 3);
+         for (size_t i = 0; i < src_coord.size(); ++i) {
              shortest_dist += std::abs(src_coord[i] - dst_coord[i]);
          }
+         ASSERT_EQ(dc_.topologies().size(), numprocs);
          for (size_t i = 0; i < numprocs; ++i) {
              size_t sd = src_degree.get(i) + (usehash && (source % numprocs == i));
              size_t td = dst_degree.get(i) + (usehash && (target % numprocs == i));
              size_t src_dist = 0;
              size_t dst_dist = 0;
-             for (size_t j = 0; j < 3; ++j) {
+             for (size_t j = 0; j < src_coord.size(); ++j) {
                 src_dist += std::abs(src_coord[j] - dc_.topologies()[i][j]);
                 dst_dist += std::abs(dst_coord[j] - dc_.topologies()[i][j]);
              }
