@@ -71,10 +71,13 @@ namespace graphlab {
     bool usehash;
     bool userecent;
 
+  private:
+      distributed_control& dc_;
+
   public:
     distributed_oblivious_ingress(distributed_control& dc, graph_type& graph, bool usehash = false, bool userecent = false) :
       base_type(dc, graph),
-      dht(-1),proc_num_edges(dc.numprocs()), usehash(usehash), userecent(userecent) { 
+      dht(-1),proc_num_edges(dc.numprocs()), usehash(usehash), userecent(userecent), dc_(dc) { 
 
       //INITIALIZE_TRACER(ob_ingress_compute_assignments, "Time spent in compute assignment");
      }
