@@ -91,7 +91,7 @@ namespace graphlab {
       dht[source]; dht[target];
       procid_t owning_proc;
       
-      if (!rpc.dc().topology_aware()) {
+      if (!dc_.topology_aware()) {
           owning_proc = base_type::edge_decision.edge_to_proc_greedy(source, target, dht[source], dht[target], proc_num_edges, usehash, userecent);  
       } else {
           owning_proc = base_type::edge_decision.edge_to_proc_greedy_and_topology(source, target, dht[source], dht[target], proc_num_edges, usehash, userecent);
