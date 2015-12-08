@@ -86,8 +86,14 @@ namespace graphlab {
                   const EdgeData& edata) {
       obliv_lock.lock();
       dht[source]; dht[target];
-      const procid_t owning_proc = 
-        base_type::edge_decision.edge_to_proc_greedy(source, target, dht[source], dht[target], proc_num_edges, usehash, userecent);
+      procid_t owning_proc;
+      
+      if (!rpc.dc().topology_aware()) {
+          owning_proc = base_type::edge_decision.edge_to_proc_greedy(source, target, dht[source], dht[target], proc_num_edges, usehash, userecent);  
+      } else {
+          owning_proc = base_type::edge_decision.edge_to_proc_greedy_and_topology(source, target, dht[source], dht[target], proc_num_edges, usehash, userecent);
+      }
+
       obliv_lock.unlock();
 
       typedef typename base_type::edge_buffer_record edge_buffer_record;

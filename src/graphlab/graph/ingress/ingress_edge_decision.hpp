@@ -119,6 +119,73 @@ namespace graphlab {
         return best_proc;
       };
 
+     /** Greedy assign (source, target) to a machine using:
+      *  bitset<MAX_MACHINE> src_degree : the degree presence of source over machines
+      *  bitset<MAX_MACHINE> dst_degree : the degree presence of target over machines
+      *  vector<size_t>      proc_num_edges : the edge counts over machines
+      * */
+     procid_t edge_to_proc_greedy_and_topology (const vertex_id_type source,
+                                   const vertex_id_type target,
+                                   bin_counts_type& src_degree,
+                                   bin_counts_type& dst_degree,
+                                   std::vector<size_t>& proc_num_edges,
+                                   bool usehash = false,
+                                   bool userecent = false) {
+         size_t numprocs = proc_num_edges.size();
+
+         // Compute the score of each proc.
+         procid_t best_proc = -1;
+         double maxscore = 0.0;
+         double epsilon = 1.0;
+         std::vector<double> proc_score(numprocs);
+         size_t minedges = *std::min_element(proc_num_edges.begin(), proc_num_edges.end());
+         size_t maxedges = *std::max_element(proc_num_edges.begin(), proc_num_edges.end());
+
+
+         const std::vector<int>& src_coord = dc->topologies()[graph_hash::hash_vertex(source) % dc->numprocs()];
+         const std::vector<int>& dst_coord = dc->topologies()[graph_hash::hash_vertex(target) % dc->numprocs()];
+         size_t shortest_dist = 0;
+         for (size_t i = 0; i < 3; ++i) {
+             shortest_dist += std::abs(src_coord[i] - dst_coord[i]);
+         }
+         for (size_t i = 0; i < numprocs; ++i) {
+             size_t sd = src_degree.get(i) + (usehash && (source % numprocs == i));
+             size_t td = dst_degree.get(i) + (usehash && (target % numprocs == i));
+             size_t src_dist = 0;
+             size_t dst_dist = 0;
+             for (size_t j = 0; j < 3; ++j) {
+                src_dist += std::abs(src_coord[j] - dc->topologies()[i][j]);
+                dst_dist += std::abs(dst_coord[j] - dc->topologies()[i][j]);
+             }
+             double bal = (maxedges - proc_num_edges[i])/(epsilon + maxedges - minedges);
+             proc_score[i] = bal + ((sd > 0) + (td > 0)) // original terms (load balance + greedy)
+                     + (shortest_dist - (src_dist + dst_dist) / 2.0) / (shortest_dist / 2.0) // minimize src_dist + dst_dist
+                     + (shortest_dist - std::abs(src_dist - dst_dist)) / (double) shortest_dist; // minimize src_dist and dst_dist difference
+         }
+         maxscore = *std::max_element(proc_score.begin(), proc_score.end());
+
+         std::vector<procid_t> top_procs;
+         for (size_t i = 0; i < numprocs; ++i)
+             if (std::fabs(proc_score[i] - maxscore) < 1e-5)
+                 top_procs.push_back(i);
+
+         // Hash the edge to one of the best procs.
+         typedef std::pair<vertex_id_type, vertex_id_type> edge_pair_type;
+         const edge_pair_type edge_pair(std::min(source, target),
+                                        std::max(source, target));
+         best_proc = top_procs[graph_hash::hash_edge(edge_pair) % top_procs.size()];
+
+         ASSERT_LT(best_proc, numprocs);
+         if (userecent) {
+             src_degree.clear();
+             dst_degree.clear();
+         }
+         src_degree.set_bit(best_proc);
+         dst_degree.set_bit(best_proc);
+         ++proc_num_edges[best_proc];
+         return best_proc;
+     };
+
       /** Greedy assign (source, target) to a machine using: 
        *  bitset<MAX_MACHINE> src_degree : the degree presence of source over machines
        *  bitset<MAX_MACHINE> dst_degree : the degree presence of target over machines
