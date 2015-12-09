@@ -43,7 +43,7 @@ namespace graphlab {
  
  private:
      distributed_control& dc_;
-   boost::unordered_map<std::pair<uint16_t, uint16_t>, size_t> coords_pair2dist;
+   static boost::unordered_map<std::pair<uint16_t, uint16_t>, size_t> coords_pair2dist;
 
     public:
       /** \brief A decision object for computing the edge assingment. */
