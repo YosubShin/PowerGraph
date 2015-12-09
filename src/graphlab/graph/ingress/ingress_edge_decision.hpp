@@ -69,12 +69,12 @@ namespace graphlab {
      ingress_edge_decision(distributed_control& dc) : dc_(dc) {
          double epsilon = 1.0;
          for (size_t i = 0; i < dc.numprocs(); ++i) {
-             const uint16_t src_coord = dc.topologies()[i];
+             const uint64_t src_coord = dc.topologies()[i];
              for (size_t j = 0; j < dc.numprocs(); ++j) {
-                 const uint16_t dst_coord = dc.topologies()[j];
+                 const uint64_t dst_coord = dc.topologies()[j];
                  const size_t src_dst_dist = coords_pair_dist(src_coord, dst_coord);
                  for (size_t k = 0; k < dc.numprocs(); ++k) {
-                     const uint16_t candidate_coord = dc.topologies()[k];
+                     const uint64_t candidate_coord = dc.topologies()[k];
                      const uint64_t key = (src_coord << 32) | (dst_coord << 16) | candidate_coord;
                      const size_t src_can_dist = coords_pair_dist(src_coord, candidate_coord);
                      const size_t dst_can_dist = coords_pair_dist(src_coord, candidate_coord);
