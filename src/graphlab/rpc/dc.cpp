@@ -114,9 +114,11 @@ unsigned char distributed_control::get_sequentialization_key() {
 }
 
 std::string topology_to_str(const uint16_t& topology) {
-  return "(" + std::to_string((topology >> 10) & 0x1F) + 
-    ", " + std::to_string((topology >> 5) & 0x1F) + 
-    ", " + std::to_string(topology & 0x1F) + ")";
+  std::ostringstream stream;
+  stream << "(" << ((topology >> 10) & 0x1F) <<
+    ", " << ((topology >> 5) & 0x1F) <<
+    ", " << (topology & 0x1F) << ")";
+  return stream.str();
 }
 
 distributed_control::distributed_control() {
