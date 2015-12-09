@@ -62,17 +62,25 @@ namespace graphlab {
  
  private:
      distributed_control& dc_;
-     boost::unordered_map<uint32_t, size_t> coords2dist;
+     boost::unordered_map<uint64_t, double> coords2score;
  
     public:
       /** \brief A decision object for computing the edge assingment. */
      ingress_edge_decision(distributed_control& dc) : dc_(dc) {
-       for (size_t i = 0; i < dc.numprocs(); ++i) {
-	 const uint16_t src_coord = dc.topologies()[i];
-	 for (size_t j = 0; j < dc.numprocs(); ++j) {
-	   const uint16_t dst_coord = dc.topologies()[j];
-	   uint32_t key = (src_coord << 16) | dst_coord;
-	   coords2dist[key] = coords_pair_dist(src_coord, dst_coord);
+         double epsilon = 1.0;
+         for (size_t i = 0; i < dc.numprocs(); ++i) {
+             const uint16_t src_coord = dc.topologies()[i];
+             for (size_t j = 0; j < dc.numprocs(); ++j) {
+                 const uint16_t dst_coord = dc.topologies()[j];
+                 const size_t src_dst_dist = coords_pair_dist(src_coord, dst_coord);
+                 for (size_t k = 0; k < dc.numprocs(); ++k) {
+                     const uint16_t candidate_coord = dc.topologies()[k];
+                     const uint64_t key = (src_coord << 32) | (dst_coord << 16) | candidate_coord;
+                     const size_t src_can_dist = coords_pair_dist(src_coord, candidate_coord);
+                     const size_t dst_can_dist = coords_pair_dist(src_coord, candidate_coord);
+                     coords2score[key] = ((2.0 * src_dst_dist - (src_can_dist + dst_can_dist)) / (epsilon + src_dst_dist)
+                                          + (src_dst_dist - std::abs(src_can_dist - dst_can_dist)) / (epsilon + shortest_dist)) / 30.0;
+                 }
 	 }
        }
      }
@@ -173,19 +181,16 @@ namespace graphlab {
          size_t minedges = *std::min_element(proc_num_edges.begin(), proc_num_edges.end());
          size_t maxedges = *std::max_element(proc_num_edges.begin(), proc_num_edges.end());
 
-         const uint32_t src_coord_shftd = dc_.topologies()[graph_hash::hash_vertex(source) % numprocs] << 16;
-         const uint32_t dst_coord_shftd = dc_.topologies()[graph_hash::hash_vertex(target) % numprocs] << 16;
-         const size_t shortest_dist = coords2dist[(src_coord_shftd | (dst_coord_shftd >> 16))];
+         const uint64_t src_dst_coords_shftd = (dc_.topologies()[graph_hash::hash_vertex(source) % numprocs] << 32) |
+             (dc_.topologies()[graph_hash::hash_vertex(target) % numprocs] << 16);
 
          for (size_t i = 0; i < numprocs; ++i) {
 	   size_t sd = src_degree.get(i);
 	   size_t td = dst_degree.get(i);
-	   size_t src_dist = coords2dist[(src_coord_shftd | dc_.topologies()[i])];
-	   size_t dst_dist = coords2dist[(dst_coord_shftd | dc_.topologies()[i])];
              double bal = (maxedges - proc_num_edges[i])/(epsilon + maxedges - minedges);
              proc_score[i] = bal + ((sd > 0) + (td > 0)) // original terms (load balance + greedy)
-	       + (2.0 * shortest_dist - (src_dist + dst_dist)) / 30.0 * (2.0 * epsilon + shortest_dist) // minimize src_dist + dst_dist
-	       + (shortest_dist - std::abs(src_dist - dst_dist)) / 30.0 * (2.0 * epsilon + shortest_dist); // minimize src_dist and dst_dist difference
+                 + coords2score[src_dsdt_coords_shftd | dc.topologies()[i]];
+	       
          }
          maxscore = *std::max_element(proc_score.begin(), proc_score.end());
 
