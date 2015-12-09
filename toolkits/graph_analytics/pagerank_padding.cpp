@@ -37,8 +37,58 @@ size_t ITERATIONS = 0;
 
 bool USE_DELTA_CACHE = false;
 
+struct vdata {
+    double first;
+    std::vector<uint8_t> second;
+
+    vdata() : first(0), second() {}
+
+    vdata(double f, const std::vector<uint8_t>& s) : first(f), second() {
+        std::cout << "Begin vdata(double f, const std::vector<uint8_t>& s)\n";
+        for (size_t i = 0; i < s.size(); ++i) {
+            second[i] += s[i];
+        }
+        std::cout << "End vdata(double f, const std::vector<uint8_t>& s)\n";
+    }
+
+    vdata& operator+=(const vdata& other) {
+        std::cout << "Begin operator+=(const vdata& other)\n";
+        first += other.first;
+        for (size_t i = 0; i < std::min(second.size(), other.second.size()); ++i) {
+            second[i] += other.second[i];
+        }
+        std::cout << "End operator+=(const vdata& other)\n";
+        return *this;
+    }
+
+    void save(graphlab::oarchive& oarc) const {
+        std::cout << "Begin save(graphlab::oarchive& oarc)\n";
+        size_t num = second.size();
+        oarc << num;
+        for (size_t i = 0; i < num; ++i) {
+            oarc << second[i];
+        }
+        oarc << first;
+        std::cout << "End save(graphlab::oarchive& oarc)\n";
+    }
+
+    void load(graphlab::iarchive& iarc) {
+        std::cout << "Begin load(graphlab::iarchive& iarc)\n";
+        second.clear();
+        size_t size = 0;
+        iarc >> size;
+        for (size_t i = 0; i < size; ++i) {
+            uint8_t element;
+            iarc >> element;
+            second.push_back(element);
+        }
+        iarc >> first;
+        std::cout << "End load(graphlab::iarchive& iarc)\n";
+    }
+};
+
 // The vertex data is just the pagerank value (a double)
-typedef double vertex_data_type;
+typedef vdata vertex_data_type;
 
 // There is no edge data in the pagerank application
 typedef graphlab::empty edge_data_type;
@@ -50,9 +100,14 @@ typedef graphlab::distributed_graph<vertex_data_type, edge_data_type> graph_type
  * A simple function used by graph.transform_vertices(init_vertex);
  * to initialize the vertes data.
  */
-void init_vertex(graph_type::vertex_type& vertex) { vertex.data() = 1; }
-
-
+void init_vertex(graph_type::vertex_type& vertex) {
+    std::cout << "Begin init_vertex(graph_type::vertex_type& vertex)\n";
+    vertex.data().first = 1;
+    for (size_t i = 0; i < 1024; ++i) {
+        vertex.data().second.push_back( (uint8_t) (i % 256));
+    }
+    std::cout << "End init_vertex(graph_type::vertex_type& vertex)\n";
+}
 
 /*
  * The factorized page rank update function extends ivertex_program
@@ -75,7 +130,7 @@ void init_vertex(graph_type::vertex_type& vertex) { vertex.data() = 1; }
  * graphlab::IS_POD_TYPE it must implement load and save functions.
  */
 class pagerank :
-  public graphlab::ivertex_program<graph_type, double> {
+    public graphlab::ivertex_program<graph_type, vdata>, public graphlab::IS_POD_TYPE {
 
   double last_change;
 public:
@@ -85,29 +140,33 @@ public:
    */
   edge_dir_type gather_edges(icontext_type& context,
                               const vertex_type& vertex) const {
+      std::cout << "Begin gather_edges(icontext_type& context, const vertex_type& vertex) const\n";
     return graphlab::IN_EDGES;
   } // end of Gather edges
 
 
   /* Gather the weighted rank of the adjacent page   */
-  double gather(icontext_type& context, const vertex_type& vertex,
+    vdata gather(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
-    return (edge.source().data() / edge.source().num_out_edges());
+        std::cout << "Begin gather(icontext_type& context, const vertex_type& vertex, edge_type& edge)\n";
+        return vdata( (edge.source().data().first / edge.source().num_out_edges()), vertex.data().second);
   }
 
   /* Use the total rank of adjacent pages to update this page */
   void apply(icontext_type& context, vertex_type& vertex,
              const gather_type& total) {
-
-    const double newval = (1.0 - RESET_PROB) * total + RESET_PROB;
-    last_change = (newval - vertex.data());
-    vertex.data() = newval;
+      std::cout << "Begin apply(icontext_type& context, vertex_type& vertex, const gather_type& total)\n";
+    const double newval = (1.0 - RESET_PROB) * total.first + RESET_PROB;
+    last_change = (newval - vertex.data().first);
+    vertex.data().first = newval;
     if (ITERATIONS) context.signal(vertex);
+    std::cout << "End apply(icontext_type& context, vertex_type& vertex, const gather_type& total)\n";
   }
 
   /* The scatter edges depend on whether the pagerank has converged */
   edge_dir_type scatter_edges(icontext_type& context,
                               const vertex_type& vertex) const {
+      std::cout << "Begin scatter_edges(icontext_type& context, const vertex_type& vertex) const\n";
     // If an iteration counter is set then
     if (ITERATIONS) return graphlab::NO_EDGES;
     // In the dynamic case we run scatter on out edges if the we need
@@ -122,8 +181,9 @@ public:
   /* The scatter function just signal adjacent pages */
   void scatter(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
+      std::cout << "Begin scatter(icontext_type& context, const vertex_type& vertex, edge_type& edge) const\n";
     if(USE_DELTA_CACHE) {
-      context.post_delta(edge.target(), last_change);
+        context.post_delta(edge.target(), vdata(last_change, vertex.data().second));
     }
 
     if(last_change > TOLERANCE || last_change < -TOLERANCE) {
@@ -131,18 +191,19 @@ public:
     } else {
       context.signal(edge.target()); //, std::fabs(last_change));
     }
+    std::cout << "End scatter(icontext_type& context, const vertex_type& vertex, edge_type& edge) const\n";
   }
 
-  void save(graphlab::oarchive& oarc) const {
-    // If we are using iterations as a counter then we do not need to
-    // move the last change in the vertex program along with the
-    // vertex data.
-    if (ITERATIONS == 0) oarc << last_change;
-  }
+  // void save(graphlab::oarchive& oarc) const {
+  //   // If we are using iterations as a counter then we do not need to
+  //   // move the last change in the vertex program along with the
+  //   // vertex data.
+  //   if (ITERATIONS == 0) oarc << last_change;
+  // }
 
-  void load(graphlab::iarchive& iarc) {
-    if (ITERATIONS == 0) iarc >> last_change;
-  }
+  // void load(graphlab::iarchive& iarc) {
+  //   if (ITERATIONS == 0) iarc >> last_change;
+  // }
 
 }; // end of factorized_pagerank update functor
 
@@ -154,18 +215,18 @@ public:
 struct pagerank_writer {
   std::string save_vertex(graph_type::vertex_type v) {
     std::stringstream strm;
-    strm << v.id() << "\t" << v.data() << "\n";
+    strm << v.id() << "\t" << v.data().first << v.data().second.size() << "\n";
     return strm.str();
   }
   std::string save_edge(graph_type::edge_type e) { return ""; }
 }; // end of pagerank writer
 
 
-double map_rank(const graph_type::vertex_type& v) { return v.data(); }
+double map_rank(const graph_type::vertex_type& v) { return v.data().first; }
 
 
 double pagerank_sum(graph_type::vertex_type v) {
-  return v.data();
+  return v.data().first;
 }
 
 int main(int argc, char** argv) {
@@ -317,4 +378,5 @@ int main(int argc, char** argv) {
 
 
 // We render this entire program in the documentation
+
 
