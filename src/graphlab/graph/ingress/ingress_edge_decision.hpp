@@ -78,7 +78,7 @@ namespace graphlab {
                      const uint64_t key = (src_coord << 32) | (dst_coord << 16) | candidate_coord;
                      const size_t src_can_dist = coords_pair_dist(src_coord, candidate_coord);
                      const size_t dst_can_dist = coords_pair_dist(dst_coord, candidate_coord);
-                     coords2score[key] = ((2.0 * src_dst_dist - (src_can_dist + dst_can_dist)) / (epsilon + src_dst_dist);
+                     coords2score[key] = ((2.0 * src_dst_dist - (src_can_dist + dst_can_dist)) / (epsilon + src_dst_dist)) / 10.0;
                                           // + (src_dst_dist - std::abs(src_can_dist - dst_can_dist)) / (5.0 * (epsilon + src_dst_dist))) / 10.0;
                  }
 	 }
