@@ -43,6 +43,7 @@ namespace graphlab {
  
  private:
      distributed_control& dc_;
+     boost::unordered_map<std::pair<std::vector<int>, std::vector<int> >, size_t> coords_pair2dist;
 
     public:
       /** \brief A decision object for computing the edge assingment. */
@@ -122,6 +123,20 @@ namespace graphlab {
         return best_proc;
       };
 
+     size_t coords_pair_dist(std::vector<int>& src, std::vector<int>& dst) {
+         std::pair<std::vector<int>, std::vector<int> > key(src, dst);
+         if (coords_pair2dist.find(key) == coords_pair2dist.end()) {
+	   size_t dist = 0;
+	   for (size_t j = 0; j < src.size(); ++j) {
+	     dist += std::abs(src[j] - dst[j]);
+	   }
+	   coords_pair2dist[key] = dist;
+	   return dist;
+         } else {
+	   return coords_pair2dist[key];
+	 }
+     }
+
      /** Greedy assign (source, target) to a machine using:
       *  bitset<MAX_MACHINE> src_degree : the degree presence of source over machines
       *  bitset<MAX_MACHINE> dst_degree : the degree presence of target over machines
@@ -147,27 +162,13 @@ namespace graphlab {
          ASSERT_EQ(dc_.topologies().size(), numprocs);
          std::vector<int> src_coord = dc_.topologies()[graph_hash::hash_vertex(source) % numprocs];
          std::vector<int> dst_coord = dc_.topologies()[graph_hash::hash_vertex(target) % numprocs];
-         size_t shortest_dist = 0;
-         if (src_coord.size() != 3) {
-             std::cout << "numprocs: " << numprocs << std::endl;
-             std::cout << "hash % numprocs: " << graph_hash::hash_vertex(source) % numprocs << std::endl;
-             for (size_t i = 0; i < numprocs; ++i) {
-                 std::cout << "proc" << i << ": size(" << dc_.topologies()[i].size() << "), coord(" << dc_.topologies()[i][0] << ", " << dc_.topologies()[i][1] << ", " << dc_.topologies()[i][2] << ")\n";
-             }    
-         }
          ASSERT_EQ(src_coord.size(), 3);
-         for (size_t i = 0; i < src_coord.size(); ++i) {
-             shortest_dist += std::abs(src_coord[i] - dst_coord[i]);
-         }
+         size_t shortest_dist = coords_pair_dist(src_coord, dst_coord);
          for (size_t i = 0; i < numprocs; ++i) {
              size_t sd = src_degree.get(i) + (usehash && (source % numprocs == i));
              size_t td = dst_degree.get(i) + (usehash && (target % numprocs == i));
-             size_t src_dist = 0;
-             size_t dst_dist = 0;
-             for (size_t j = 0; j < src_coord.size(); ++j) {
-                src_dist += std::abs(src_coord[j] - dc_.topologies()[i][j]);
-                dst_dist += std::abs(dst_coord[j] - dc_.topologies()[i][j]);
-             }
+             size_t src_dist = coords_pair_dist(src_coord, dc_.topologies()[i]);
+             size_t dst_dist = coords_pair_dist(dst_coord, dc_.topologies()[i]);
              double bal = (maxedges - proc_num_edges[i])/(epsilon + maxedges - minedges);
              proc_score[i] = bal + ((sd > 0) + (td > 0)) // original terms (load balance + greedy)
                      + (shortest_dist - (src_dist + dst_dist) / 2.0) / ((epsilon + shortest_dist) / 2.0) // minimize src_dist + dst_dist
