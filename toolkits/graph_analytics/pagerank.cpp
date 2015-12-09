@@ -63,18 +63,18 @@ struct vdata {
 
     void save(graphlab::oarchive& oarc) const {
         std::cout << "Begin save(graphlab::oarchive& oarc)\n";
-        oarc << first;
-        oarc << second.size();
-        for (size_t i = 0; i < second.size(); ++i) {
+        size_t num = second.size();
+        oarc << num;
+        for (size_t i = 0; i < num; ++i) {
             oarc << second[i];
         }
+        oarc << first;
         std::cout << "End save(graphlab::oarchive& oarc)\n";
     }
 
     void load(graphlab::iarchive& iarc) {
         std::cout << "Begin load(graphlab::iarchive& iarc)\n";
         second.clear();
-        iarc >> first;
         size_t size = 0;
         iarc >> size;
         for (size_t i = 0; i < size; ++i) {
@@ -82,6 +82,7 @@ struct vdata {
             iarc >> element;
             second.push_back(element);
         }
+        iarc >> first;
         std::cout << "End load(graphlab::iarchive& iarc)\n";
     }
 };
