@@ -189,7 +189,7 @@ namespace graphlab {
 	   size_t td = dst_degree.get(i);
              double bal = (maxedges - proc_num_edges[i])/(epsilon + maxedges - minedges);
              proc_score[i] = bal + ((sd > 0) + (td > 0)) // original terms (load balance + greedy)
-                 + coords2score[src_dsdt_coords_shftd | dc.topologies()[i]];
+                 + coords2score[src_dst_coords_shftd | dc.topologies()[i]];
 	       
          }
          maxscore = *std::max_element(proc_score.begin(), proc_score.end());
