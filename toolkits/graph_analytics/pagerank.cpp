@@ -147,22 +147,25 @@ public:
   /* Gather the weighted rank of the adjacent page   */
     vdata gather(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
+        std::cout << "Begin gather(icontext_type& context, const vertex_type& vertex, edge_type& edge)\n";
         return vdata( (edge.source().data().first / edge.source().num_out_edges()), vertex.data().second);
   }
 
   /* Use the total rank of adjacent pages to update this page */
   void apply(icontext_type& context, vertex_type& vertex,
              const gather_type& total) {
-
+      std::cout << "Begin apply(icontext_type& context, vertex_type& vertex, const gather_type& total)\n";
     const double newval = (1.0 - RESET_PROB) * total.first + RESET_PROB;
     last_change = (newval - vertex.data().first);
     vertex.data().first = newval;
     if (ITERATIONS) context.signal(vertex);
+    std::cout << "End apply(icontext_type& context, vertex_type& vertex, const gather_type& total)\n";
   }
 
   /* The scatter edges depend on whether the pagerank has converged */
   edge_dir_type scatter_edges(icontext_type& context,
                               const vertex_type& vertex) const {
+      std::cout << "Begin scatter_edges(icontext_type& context, const vertex_type& vertex) const\n";
     // If an iteration counter is set then
     if (ITERATIONS) return graphlab::NO_EDGES;
     // In the dynamic case we run scatter on out edges if the we need
@@ -177,6 +180,7 @@ public:
   /* The scatter function just signal adjacent pages */
   void scatter(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
+      std::cout << "Begin scatter(icontext_type& context, const vertex_type& vertex, edge_type& edge) const\n";
     if(USE_DELTA_CACHE) {
         context.post_delta(edge.target(), vdata(last_change, vertex.data().second));
     }
@@ -186,6 +190,7 @@ public:
     } else {
       context.signal(edge.target()); //, std::fabs(last_change));
     }
+    std::cout << "End scatter(icontext_type& context, const vertex_type& vertex, edge_type& edge) const\n";
   }
 
   // void save(graphlab::oarchive& oarc) const {
