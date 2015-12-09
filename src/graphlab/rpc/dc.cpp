@@ -55,6 +55,14 @@
 
 namespace graphlab {
 
+std::string topology_to_str(const uint16_t& topology) {
+  std::ostringstream stream;
+  stream << "(" << ((topology >> 10) & 0x1F) <<
+    ", " << ((topology >> 5) & 0x1F) <<
+    ", " << (topology & 0x1F) << ")";
+  return stream.str();
+}
+
 namespace dc_impl {
 
 
@@ -111,14 +119,6 @@ unsigned char distributed_control::get_sequentialization_key() {
   size_t oldval = reinterpret_cast<size_t>(pthread_getspecific(dc_impl::thrlocal_sequentialization_key));
   assert(oldval < 256);
   return (unsigned char)oldval;
-}
-
-std::string topology_to_str(const uint16_t& topology) {
-  std::ostringstream stream;
-  stream << "(" << ((topology >> 10) & 0x1F) <<
-    ", " << ((topology >> 5) & 0x1F) <<
-    ", " << (topology & 0x1F) << ")";
-  return stream.str();
 }
 
 distributed_control::distributed_control() {

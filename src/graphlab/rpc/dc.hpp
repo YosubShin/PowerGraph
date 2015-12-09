@@ -58,7 +58,7 @@
 
 namespace graphlab {
 
-
+  static std::string topology_to_str(const uint16_t& topology);
 /**
  *  \ingroup rpc
  *  \brief Distributed control constructor parameters.
@@ -450,8 +450,6 @@ class distributed_control{
    * generally useful.
    */
   static unsigned char get_sequentialization_key();
-
-  static std::string topology_to_str(const uint16_t& topology);
 
 
   /*
