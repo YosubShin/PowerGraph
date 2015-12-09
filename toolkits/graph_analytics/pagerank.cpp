@@ -96,7 +96,7 @@ public:
 
 
   /* Gather the weighted rank of the adjacent page   */
-  double gather(icontext_type& context, const vertex_type& vertex,
+    std::pair<double, std::vector<uint8_t> > gather(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
       return std::pair( (edge.source().data().first / edge.source().num_out_edges()), vertex.data().second);
   }
