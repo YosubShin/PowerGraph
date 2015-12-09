@@ -43,7 +43,7 @@ namespace graphlab {
  
  private:
      distributed_control& dc_;
-   boost::unordered_map<uint32_t>, size_t> coords_pair2dist;
+   boost::unordered_map<uint32_t, size_t> coords_pair2dist;
 
    size_t coords_pair_dist(const uint16_t& src, const uint16_t& dst) {
      uint32_t key = (src << 16) | dst;
