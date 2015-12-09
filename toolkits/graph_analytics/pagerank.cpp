@@ -43,7 +43,11 @@ struct vdata {
 
     vdata() : first(0), second() {}
 
-    vdata(double f, const std::vector<uint8_t>& s) : first(f), second(s) {}
+    vdata(double f, const std::vector<uint8_t>& s) : first(f), second() {
+        for (size_t i = 0; i < s.size(); ++i) {
+            second[i] += s.second[i];
+        }
+    }
 
     vdata& operator+=(const vdata& other) {
         first += other.first;
