@@ -165,8 +165,7 @@ namespace graphlab {
 
          const uint16_t src_coord = dc_.topologies()[graph_hash::hash_vertex(source) % numprocs];
          const uint16_t dst_coord = dc_.topologies()[graph_hash::hash_vertex(target) % numprocs];
-         // const size_t shortest_dist = coords_pair_dist(src_coord, dst_coord);
-         const size_t shortest_dist = 10;
+         const size_t shortest_dist = coords_pair_dist(src_coord, dst_coord);
          for (size_t i = 0; i < numprocs; ++i) {
              size_t sd = src_degree.get(i) + (usehash && (source % numprocs == i));
              size_t td = dst_degree.get(i) + (usehash && (target % numprocs == i));
@@ -174,8 +173,8 @@ namespace graphlab {
              size_t dst_dist = coords_pair_dist(dst_coord, dc_.topologies()[i]);
              double bal = (maxedges - proc_num_edges[i])/(epsilon + maxedges - minedges);
              proc_score[i] = bal + ((sd > 0) + (td > 0)) // original terms (load balance + greedy)
-	       + (2.0 * shortest_dist - (src_dist + dst_dist)) / 40.0 * (2.0 * epsilon + shortest_dist) // minimize src_dist + dst_dist
-                     + (shortest_dist - std::abs(src_dist - dst_dist)) / 40.0 * (2.0 * epsilon + shortest_dist); // minimize src_dist and dst_dist difference
+	       + (2.0 * shortest_dist - (src_dist + dst_dist)) / 40.0 * (2.0 * epsilon + shortest_dist); // minimize src_dist + dst_dist
+                     // + (shortest_dist - std::abs(src_dist - dst_dist)) / 40.0 * (2.0 * epsilon + shortest_dist); // minimize src_dist and dst_dist difference
          }
          maxscore = *std::max_element(proc_score.begin(), proc_score.end());
 
