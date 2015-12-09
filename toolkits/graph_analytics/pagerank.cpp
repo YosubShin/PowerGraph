@@ -105,7 +105,7 @@ public:
   void apply(icontext_type& context, vertex_type& vertex,
              const gather_type& total) {
 
-    const double newval = (1.0 - RESET_PROB) * total + RESET_PROB;
+    const double newval = (1.0 - RESET_PROB) * total.first + RESET_PROB;
     last_change = (newval - vertex.data().first);
     vertex.data().first = newval;
     if (ITERATIONS) context.signal(vertex);
