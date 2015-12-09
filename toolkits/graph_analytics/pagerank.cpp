@@ -98,7 +98,7 @@ public:
   /* Gather the weighted rank of the adjacent page   */
     std::pair<double, std::vector<uint8_t> > gather(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
-      return std::pair( (edge.source().data().first / edge.source().num_out_edges()), vertex.data().second);
+        return std::pair<double, std::vector<uint8_t> >( (edge.source().data().first / edge.source().num_out_edges()), vertex.data().second);
   }
 
   /* Use the total rank of adjacent pages to update this page */
