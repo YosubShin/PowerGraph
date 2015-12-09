@@ -104,7 +104,7 @@ void init_vertex(graph_type::vertex_type& vertex) {
     vertex.data().first = 1;
     vertex.data().second.resize(1024);
     for (size_t i = 0; vertex.data().second.size(); ++i) {
-        vertex.data().second[i] = (uint8_t) (i % 256);
+        vertex.data().second.push_back( (uint8_t) (i % 256));
     }
     std::cout << "End init_vertex(graph_type::vertex_type& vertex)\n";
 }
