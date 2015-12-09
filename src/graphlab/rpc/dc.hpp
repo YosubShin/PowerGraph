@@ -84,8 +84,15 @@ struct dc_init_param{
 
   /**
    * A vector of coordinates of the node in 3d-Torus topology in the supercomputer interconnect.
+   * 16 bit encoding of topology. 
+   * 0100001010010001 => (x: 16, y: 20, z: 17)
+   *  -----
+   *    |  -----
+   *    |    |  -----
+   *    |    |    |
+   *    x    y    z
    */
-  std::vector<std::vector<int> > topologies;
+  std::vector<uint16_t> topologies;
 
   bool topologyaware;
 
@@ -226,7 +233,7 @@ class distributed_control{
              procid_t curmachineid,
              size_t numhandlerthreads,
              dc_comm_type commtype = RPC_DEFAULT_COMMTYPE,
-             std::vector<std::vector<int> > topologies = std::vector<std::vector<int> >(),
+             std::vector<uint16_t> topologies = std::vector<uint16_t>(),
              bool topology_aware = false);
 
   /// a pointer to the communications subsystem
@@ -241,7 +248,7 @@ class distributed_control{
   std::vector<atomic<size_t> > fcall_handler_active;
   dense_bitset fcall_handler_blockers;
 
-  std::vector<std::vector<int> > topologies_;
+  std::vector<uint16_t> topologies_;
   bool topology_aware_;
 
   struct fcallqueue_entry {
@@ -322,7 +329,7 @@ class distributed_control{
 
   ~distributed_control();
 
-  const std::vector<std::vector<int> > topologies() const {
+  const std::vector<uint16_t> topologies() const {
     return topologies_;
   }
 
@@ -444,7 +451,7 @@ class distributed_control{
    */
   static unsigned char get_sequentialization_key();
 
-
+  static std::string topology_to_str(const uint16_t& topology);
 
 
   /*

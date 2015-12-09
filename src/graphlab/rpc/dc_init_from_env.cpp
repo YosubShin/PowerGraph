@@ -67,10 +67,12 @@ bool init_param_from_env(dc_init_param& param) {
       std::string line;
       std::getline(ifs, line);
       std::vector<std::string> str_coord =  strsplit(line, " ");
-      std::vector<int> coord(3);
+      uint16_t coord = 0;
       for (size_t j = 0; j < 3; ++j) {
         std::stringstream strm(str_coord[j]);
-        strm >> coord[j];
+	int num = 0;
+        strm >> num;
+	coord |= (num << (10 - j * 5));
       }
       param.topologies.push_back(coord);
     }

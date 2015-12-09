@@ -43,7 +43,7 @@ namespace graphlab {
  
  private:
      distributed_control& dc_;
-     boost::unordered_map<std::pair<std::vector<int>, std::vector<int> >, size_t> coords_pair2dist;
+   boost::unordered_map<std::pair<uint16_t, uint16_t>, size_t> coords_pair2dist;
 
     public:
       /** \brief A decision object for computing the edge assingment. */
@@ -123,18 +123,21 @@ namespace graphlab {
         return best_proc;
       };
 
-     size_t coords_pair_dist(const std::vector<int>& src, const std::vector<int>& dst) {
-         std::pair<std::vector<int>, std::vector<int> > key(src, dst);
-         if (coords_pair2dist.find(key) == coords_pair2dist.end()) {
-	   size_t dist = 0;
-	   for (size_t j = 0; j < src.size(); ++j) {
-	     dist += std::abs(src[j] - dst[j]);
-	   }
-	   coords_pair2dist[key] = dist;
-	   return dist;
-         } else {
-	   return coords_pair2dist[key];
+     size_t coords_pair_dist(const uint16_t& src, const uint16_t& dst) {
+       std::pair<uint16_t, uint16_t> key(src, dst);
+       if (coords_pair2dist.find(key) == coords_pair2dist.end()) {
+	 size_t dist = 0;
+	 for (size_t j = 0; j < 2; ++j) {
+	   size_t src_val = (src >> (10 - 5 * j)) & 0x1F;
+	   size_t dst_val = (dst >> (10 - 5 * j)) & 0x1F;
+	   size_t abs = std::abs(src_val - dst_val);
+	   dist += std::min(abs, 24 - abs);
 	 }
+	 coords_pair2dist[key] = dist;
+	 return dist;
+       } else {
+	 return coords_pair2dist[key];
+       }
      }
 
      /** Greedy assign (source, target) to a machine using:
@@ -159,10 +162,8 @@ namespace graphlab {
          size_t minedges = *std::min_element(proc_num_edges.begin(), proc_num_edges.end());
          size_t maxedges = *std::max_element(proc_num_edges.begin(), proc_num_edges.end());
 
-         ASSERT_EQ(dc_.topologies().size(), numprocs);
-         std::vector<int> src_coord = dc_.topologies()[graph_hash::hash_vertex(source) % numprocs];
-         std::vector<int> dst_coord = dc_.topologies()[graph_hash::hash_vertex(target) % numprocs];
-         ASSERT_EQ(src_coord.size(), 3);
+         const uint16_t src_coord = dc_.topologies()[graph_hash::hash_vertex(source) % numprocs];
+         const uint16_t dst_coord = dc_.topologies()[graph_hash::hash_vertex(target) % numprocs];
          size_t shortest_dist = coords_pair_dist(src_coord, dst_coord);
          for (size_t i = 0; i < numprocs; ++i) {
              size_t sd = src_degree.get(i) + (usehash && (source % numprocs == i));

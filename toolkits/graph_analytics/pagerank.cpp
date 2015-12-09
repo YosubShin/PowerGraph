@@ -304,16 +304,6 @@ int main(int argc, char** argv) {
     ofs << "pagerank," << ingress_method << "," << ITERATIONS << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << num_master2mirror_hops<< "," << average_local_own_nverts<< "," << variance_local_own_nverts << std::endl;
 
     ofs.close();
-
-    std::cout << "Topologies:\n";
-    for (size_t i = 0; i < dc.topologies().size(); ++i) {
-      std::cout << "procid: " << i << ": ";
-      std::vector<int> coord = dc.topologies()[i];
-      for (size_t j = 0; j < coord.size(); ++j) {
-        std::cout << coord[j] << " ";
-      }
-      std::cout << std::endl;
-    }
   }
 
   // Tear-down communication layer and quit -----------------------------------

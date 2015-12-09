@@ -113,6 +113,11 @@ unsigned char distributed_control::get_sequentialization_key() {
   return (unsigned char)oldval;
 }
 
+std::string topology_to_str(const uint16_t& topology) {
+  return "(" + std::to_string((topology >> 10) & 0x1F) + 
+    ", " + std::to_string((topology >> 5) & 0x1F) + 
+    ", " + std::to_string(topology & 0x1F) + ")";
+}
 
 distributed_control::distributed_control() {
   dc_init_param initparam;
@@ -493,7 +498,7 @@ void distributed_control::init(const std::vector<std::string> &machines,
             procid_t curmachineid,
             size_t numhandlerthreads,
             dc_comm_type commtype,
-            std::vector<std::vector<int> > topologies,
+            std::vector<uint16_t> topologies,
             bool topologyaware) {
 
   if (numhandlerthreads == RPC_DEFAULT_NUMHANDLERTHREADS) {
@@ -615,7 +620,7 @@ void distributed_control::init(const std::vector<std::string> &machines,
   ASSERT_GT(topologies_.size(), 0);
   if (procid() == 0) {
     for (size_t i = 0; i < topologies_.size(); ++i) {
-      std::cout << "Topology for proc " << i << " : " << topologies_[i][0] << ", " << topologies_[i][1] << ", " << topologies_[i][2] << std::endl;
+      std::cout << "Topology for proc " << i << " : " << topology_to_str(topologies_[i]) << std::endl;
     }
   }
 
