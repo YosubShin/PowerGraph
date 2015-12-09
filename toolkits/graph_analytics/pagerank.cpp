@@ -102,8 +102,7 @@ typedef graphlab::distributed_graph<vertex_data_type, edge_data_type> graph_type
 void init_vertex(graph_type::vertex_type& vertex) {
     std::cout << "Begin init_vertex(graph_type::vertex_type& vertex)\n";
     vertex.data().first = 1;
-    vertex.data().second.resize(1024);
-    for (size_t i = 0; vertex.data().second.size(); ++i) {
+    for (size_t i = 0; i < 1024; ++i) {
         vertex.data().second.push_back( (uint8_t) (i % 256));
     }
     std::cout << "End init_vertex(graph_type::vertex_type& vertex)\n";
