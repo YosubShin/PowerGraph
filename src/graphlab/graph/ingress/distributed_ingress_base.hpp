@@ -575,25 +575,6 @@ namespace graphlab {
           exchange_global_info();
       } // end of finalize
 
-    boost::unordered_map<std::pair<uint16_t, uint16_t>, size_t> coords_pair2dist;
-
-    size_t coords_pair_dist(const uint16_t& src, const uint16_t& dst) {
-      std::pair<uint16_t, uint16_t> key(src, dst);
-      if (coords_pair2dist.find(key) == coords_pair2dist.end()) {
-	size_t dist = 0;
-	for (size_t j = 0; j < 2; ++j) {
-	  size_t src_val = (src >> (10 - 5 * j)) & 0x1F;
-	  size_t dst_val = (dst >> (10 - 5 * j)) & 0x1F;
-	  size_t abs = std::abs(src_val - dst_val);
-	  dist += std::min(abs, 23 - abs);
-	}
-	coords_pair2dist[key] = dist;
-	return dist;
-      } else {
-	return coords_pair2dist[key];
-      }
-    }
-
     /* Exchange graph statistics among all nodes and compute
      * global statistics for the distributed graph. */
     void exchange_global_info () {

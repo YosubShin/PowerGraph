@@ -32,6 +32,25 @@
 namespace graphlab {
   template<typename VertexData, typename EdgeData>
   class distributed_graph;
+
+  static boost::unordered_map<uint32_t, size_t> coords_pair2dist;
+
+  static size_t coords_pair_dist(const uint16_t& src, const uint16_t& dst) {
+    uint32_t key = (src << 16) | dst;
+    if (coords_pair2dist.find(key) == coords_pair2dist.end()) {
+      size_t dist = 0;
+      for (size_t j = 0; j < 2; ++j) {
+	size_t src_val = (src >> (10 - 5 * j)) & 0x1F;
+	size_t dst_val = (dst >> (10 - 5 * j)) & 0x1F;
+	size_t abs = std::abs(src_val - dst_val);
+	dist += std::min(abs, 23 - abs);
+      }
+      coords_pair2dist[key] = dist;
+      return dist;
+    } else {
+      return coords_pair2dist[key];
+    }
+  }
  
  template<typename VertexData, typename EdgeData>
  class ingress_edge_decision {
@@ -43,25 +62,7 @@ namespace graphlab {
  
  private:
      distributed_control& dc_;
-   boost::unordered_map<uint32_t, size_t> coords_pair2dist;
-
-   size_t coords_pair_dist(const uint16_t& src, const uint16_t& dst) {
-     uint32_t key = (src << 16) | dst;
-     if (coords_pair2dist.find(key) == coords_pair2dist.end()) {
-       size_t dist = 0;
-       for (size_t j = 0; j < 2; ++j) {
-	 size_t src_val = (src >> (10 - 5 * j)) & 0x1F;
-	 size_t dst_val = (dst >> (10 - 5 * j)) & 0x1F;
-	 size_t abs = std::abs(src_val - dst_val);
-	 dist += std::min(abs, 23 - abs);
-       }
-       coords_pair2dist[key] = dist;
-       return dist;
-     } else {
-       return coords_pair2dist[key];
-     }
-   }
-
+ 
     public:
       /** \brief A decision object for computing the edge assingment. */
      ingress_edge_decision(distributed_control& dc) : dc_(dc) {}
