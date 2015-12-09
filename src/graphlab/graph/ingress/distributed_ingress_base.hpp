@@ -654,6 +654,20 @@ namespace graphlab {
         graph.variance_local_own_nverts = 0;
         foreach(uint64_t count, swap_counts_uint64) graph.variance_local_own_nverts += count;
 
+
+        // Average number of local master edges
+        swap_counts_uint64[rpc.procid()] = graph.num_local_edges();
+        rpc.all_gather(swap_counts_uint64);
+        graph.average_local_edges = 0;
+        foreach(uint64_t count, swap_counts_uint64) graph.average_local_edges += count;
+        graph.average_local_edges = (double) graph.average_local_edges / rpc.numprocs();
+
+        // Variance of number of local master vertices
+        swap_counts_uint64[rpc.procid()] = std::pow((graph.num_local_edges() - graph.average_local_edges), 2);
+        rpc.all_gather(swap_counts_uint64);
+        graph.variance_local_edges = 0;
+        foreach(uint64_t count, swap_counts_uint64) graph.variance_local_edges += count;
+
       if (rpc.procid() == 0) {
         logstream(LOG_EMPH) << "Graph info: "  
                             << "\n\t nverts: " << graph.num_vertices()
@@ -663,6 +677,8 @@ namespace graphlab {
                             << "\n\t number of hops b/w master-mirrors: " << (double)graph.master2mirror_hops / graph.num_vertices()
                             << "\n\t average number of local master vertices: " << graph.average_local_own_nverts
                             << "\n\t variance of number of local master vertices: " << graph.variance_local_own_nverts
+                            << "\n\t average number of local edges: " << graph.average_local_edges
+                            << "\n\t variance of number of local edges: " << graph.variance_local_edges
                             << std::endl;
       }
     }

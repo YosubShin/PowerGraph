@@ -2685,6 +2685,10 @@ namespace graphlab {
 
       double variance_num_local_own_vertices() const { return variance_local_own_nverts; }
 
+      double average_num_local_edges() const { return average_local_edges; }
+
+      double variance_num_local_edges() const { return variance_local_edges; }
+
     /** \internal
      *\brief Convert a global vid to a local vid */
     lvid_type local_vid (const vertex_id_type vid) const {
@@ -3171,6 +3175,10 @@ namespace graphlab {
       double average_local_own_nverts;
 
       double variance_local_own_nverts;
+
+      double average_local_edges;
+
+      double variance_local_edges;
 
     /** The global number of vertex replica */
     size_t nreplicas;
