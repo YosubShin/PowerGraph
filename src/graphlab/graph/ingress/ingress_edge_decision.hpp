@@ -62,10 +62,20 @@ namespace graphlab {
  
  private:
      distributed_control& dc_;
+     boost::unordered_map<uint32_t, size_t> coords2dist;
  
     public:
       /** \brief A decision object for computing the edge assingment. */
-     ingress_edge_decision(distributed_control& dc) : dc_(dc) {}
+     ingress_edge_decision(distributed_control& dc) : dc_(dc) {
+       for (size_t i = 0; i < dc.numprocs(); ++i) {
+	 const uint16_t src_coord = dc.topologies()[i];
+	 for (size_t j = 0; j < dc.numprocs(); ++j) {
+	   const uint16_t dst_coord = dc.topologies()[j];
+	   uint32_t key = (src_coord << 16) | dst_coord;
+	   coords2dist[key] = coords_pair_dist(src_coord, dst_coord);
+	 }
+       }
+     }
 
       /** Random assign (source, target) to a machine p in {0, ... numprocs-1} */
       procid_t edge_to_proc_random (const vertex_id_type source, 
@@ -169,8 +179,10 @@ namespace graphlab {
          for (size_t i = 0; i < numprocs; ++i) {
              size_t sd = src_degree.get(i) + (usehash && (source % numprocs == i));
              size_t td = dst_degree.get(i) + (usehash && (target % numprocs == i));
-             size_t src_dist = coords_pair_dist(src_coord, dc_.topologies()[i]);
-             size_t dst_dist = coords_pair_dist(dst_coord, dc_.topologies()[i]);
+             // size_t src_dist = coords_pair_dist(src_coord, dc_.topologies()[i]);
+             // size_t dst_dist = coords_pair_dist(dst_coord, dc_.topologies()[i]);
+             size_t src_dist = coords2dist[((src_coord << 16) | dc_.topologies()[i])];
+             size_t dst_dist = coords2dist[((dst_coord << 16) | dc_.topologies()[i])];
              double bal = (maxedges - proc_num_edges[i])/(epsilon + maxedges - minedges);
              proc_score[i] = bal + ((sd > 0) + (td > 0)) // original terms (load balance + greedy)
 	       + (2.0 * shortest_dist - (src_dist + dst_dist)) / 40.0 * (2.0 * epsilon + shortest_dist) // minimize src_dist + dst_dist
