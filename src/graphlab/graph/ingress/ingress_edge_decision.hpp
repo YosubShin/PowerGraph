@@ -169,8 +169,8 @@ namespace graphlab {
          for (size_t i = 0; i < numprocs; ++i) {
              size_t sd = src_degree.get(i) + (usehash && (source % numprocs == i));
              size_t td = dst_degree.get(i) + (usehash && (target % numprocs == i));
-             size_t src_dist = coords_pair_dist(src_coord, dc_.topologies()[i]);
-             size_t dst_dist = coords_pair_dist(dst_coord, dc_.topologies()[i]);
+             // size_t src_dist = coords_pair_dist(src_coord, dc_.topologies()[i]);
+             // size_t dst_dist = coords_pair_dist(dst_coord, dc_.topologies()[i]);
              double bal = (maxedges - proc_num_edges[i])/(epsilon + maxedges - minedges);
              proc_score[i] = bal + ((sd > 0) + (td > 0)); // original terms (load balance + greedy)
 	       // + (2.0 * shortest_dist - (src_dist + dst_dist)) / 40.0 * (2.0 * epsilon + shortest_dist) // minimize src_dist + dst_dist
