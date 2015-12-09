@@ -140,6 +140,7 @@ public:
    */
   edge_dir_type gather_edges(icontext_type& context,
                               const vertex_type& vertex) const {
+      std::cout << "Begin gather_edges(icontext_type& context, const vertex_type& vertex) const\n";
     return graphlab::IN_EDGES;
   } // end of Gather edges
 
