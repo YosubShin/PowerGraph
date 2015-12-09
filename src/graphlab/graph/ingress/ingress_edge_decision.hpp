@@ -123,7 +123,7 @@ namespace graphlab {
         return best_proc;
       };
 
-     size_t coords_pair_dist(std::vector<int>& src, std::vector<int>& dst) {
+     size_t coords_pair_dist(const std::vector<int>& src, const std::vector<int>& dst) {
          std::pair<std::vector<int>, std::vector<int> > key(src, dst);
          if (coords_pair2dist.find(key) == coords_pair2dist.end()) {
 	   size_t dist = 0;
