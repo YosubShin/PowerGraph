@@ -38,7 +38,7 @@ size_t ITERATIONS = 0;
 bool USE_DELTA_CACHE = false;
 
 // The vertex data is just the pagerank value (a double)
-typedef double vertex_data_type;
+typedef std::pair<double, std::vector<uint8_t> > vertex_data_type;
 
 // There is no edge data in the pagerank application
 typedef graphlab::empty edge_data_type;
