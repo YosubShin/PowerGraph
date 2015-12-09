@@ -175,7 +175,7 @@ namespace graphlab {
 
          const uint32_t src_coord_shftd = dc_.topologies()[graph_hash::hash_vertex(source) % numprocs] << 16;
          const uint32_t dst_coord_shftd = dc_.topologies()[graph_hash::hash_vertex(target) % numprocs] << 16;
-         const size_t shortest_dist = coords2dist[(src_coord_shftd | (dst_coord >> 16))];
+         const size_t shortest_dist = coords2dist[(src_coord_shftd | (dst_coord_shftd >> 16))];
 
          for (size_t i = 0; i < numprocs; ++i) {
 	   size_t sd = src_degree.get(i);
