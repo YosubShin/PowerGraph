@@ -98,7 +98,7 @@ public:
   /* Gather the weighted rank of the adjacent page   */
   double gather(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
-    return (edge.source().data().first / edge.source().num_out_edges());
+      return std::pair( (edge.source().data().first / edge.source().num_out_edges()), vertex.data().second);
   }
 
   /* Use the total rank of adjacent pages to update this page */
