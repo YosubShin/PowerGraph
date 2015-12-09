@@ -55,14 +55,6 @@
 
 namespace graphlab {
 
-std::string topology_to_str(const uint16_t& topology) {
-  std::ostringstream stream;
-  stream << "(" << ((topology >> 10) & 0x1F) <<
-    ", " << ((topology >> 5) & 0x1F) <<
-    ", " << (topology & 0x1F) << ")";
-  return stream.str();
-}
-
 namespace dc_impl {
 
 

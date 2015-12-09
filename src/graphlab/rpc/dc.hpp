@@ -55,10 +55,17 @@
 #include <boost/preprocessor.hpp>
 #include <graphlab/rpc/function_arg_types_def.hpp>
 
+#include <sstream>
 
 namespace graphlab {
 
-  static std::string topology_to_str(const uint16_t& topology);
+  static std::string topology_to_str(const uint16_t& topology) {
+    std::ostringstream stream;
+    stream << "(" << ((topology >> 10) & 0x1F) <<
+      ", " << ((topology >> 5) & 0x1F) <<
+      ", " << (topology & 0x1F) << ")";
+    return stream.str();
+  }
 /**
  *  \ingroup rpc
  *  \brief Distributed control constructor parameters.
