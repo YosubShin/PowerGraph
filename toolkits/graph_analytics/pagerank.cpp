@@ -130,7 +130,7 @@ void init_vertex(graph_type::vertex_type& vertex) {
  * graphlab::IS_POD_TYPE it must implement load and save functions.
  */
 class pagerank :
-    public graphlab::ivertex_program<graph_type, vdata> {
+    public graphlab::ivertex_program<graph_type, vdata>, public graphlab::IS_POD_TYPE {
 
   double last_change;
 public:
@@ -188,16 +188,16 @@ public:
     }
   }
 
-  void save(graphlab::oarchive& oarc) const {
-    // If we are using iterations as a counter then we do not need to
-    // move the last change in the vertex program along with the
-    // vertex data.
-    if (ITERATIONS == 0) oarc << last_change;
-  }
+  // void save(graphlab::oarchive& oarc) const {
+  //   // If we are using iterations as a counter then we do not need to
+  //   // move the last change in the vertex program along with the
+  //   // vertex data.
+  //   if (ITERATIONS == 0) oarc << last_change;
+  // }
 
-  void load(graphlab::iarchive& iarc) {
-    if (ITERATIONS == 0) iarc >> last_change;
-  }
+  // void load(graphlab::iarchive& iarc) {
+  //   if (ITERATIONS == 0) iarc >> last_change;
+  // }
 
 }; // end of factorized_pagerank update functor
 
