@@ -37,8 +37,37 @@ size_t ITERATIONS = 0;
 
 bool USE_DELTA_CACHE = false;
 
+struct vdata {
+    double first;
+    std::vector<uint8_t> second;
+
+    vdata() : first(0), second() {}
+
+    vdata(double f, std::vector<uint8_t>& s) : first(f), second(s) {}
+
+    void save(graphlab::oarchive& oarc) const {
+        oarc << first;
+        oarc << second.size();
+        for (size_t i = 0; i < second.size(); ++i) {
+            oarc << second[i];
+        }
+    }
+
+    void load(graphlab::iarchive& iarc) {
+        second.clear();
+        iarc >> first;
+        size_t size = 0;
+        iarc >> size;
+        for (size_t i = 0; i < size; ++i) {
+            uint8_t element;
+            iarc >> element;
+            second.push_back(element);
+        }
+    }
+};
+
 // The vertex data is just the pagerank value (a double)
-typedef std::pair<double, std::vector<uint8_t> > vertex_data_type;
+typedef vdata vertex_data_type;
 
 // There is no edge data in the pagerank application
 typedef graphlab::empty edge_data_type;
@@ -57,8 +86,6 @@ void init_vertex(graph_type::vertex_type& vertex) {
         vertex.data().second[i] = (uint8_t) (i % 256);
     }
 }
-
-
 
 /*
  * The factorized page rank update function extends ivertex_program
@@ -81,7 +108,7 @@ void init_vertex(graph_type::vertex_type& vertex) {
  * graphlab::IS_POD_TYPE it must implement load and save functions.
  */
 class pagerank :
-    public graphlab::ivertex_program<graph_type, std::pair<double, std::vector<uint8_t> > > {
+    public graphlab::ivertex_program<graph_type, vdata> {
 
   double last_change;
 public:
@@ -96,9 +123,9 @@ public:
 
 
   /* Gather the weighted rank of the adjacent page   */
-    std::pair<double, std::vector<uint8_t> > gather(icontext_type& context, const vertex_type& vertex,
+    vdata gather(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
-        return std::pair<double, std::vector<uint8_t> >( (edge.source().data().first / edge.source().num_out_edges()), vertex.data().second);
+        return vdata( (edge.source().data().first / edge.source().num_out_edges()), vertex.data().second);
   }
 
   /* Use the total rank of adjacent pages to update this page */
@@ -129,7 +156,7 @@ public:
   void scatter(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
     if(USE_DELTA_CACHE) {
-        context.post_delta(edge.target(), std::pair<double, std::vector<uint8_t> >(last_change, vertex.data().second));
+        context.post_delta(edge.target(), vdata(last_change, vertex.data().second));
     }
 
     if(last_change > TOLERANCE || last_change < -TOLERANCE) {
