@@ -50,7 +50,13 @@ typedef graphlab::distributed_graph<vertex_data_type, edge_data_type> graph_type
  * A simple function used by graph.transform_vertices(init_vertex);
  * to initialize the vertes data.
  */
-void init_vertex(graph_type::vertex_type& vertex) { vertex.data() = 1; }
+void init_vertex(graph_type::vertex_type& vertex) {
+    vertex.data().first = 1;
+    vertex.data().second.resize(1024);
+    for (size_t i = 0; vertex.data().second.size(); ++i) {
+        vertex.data().second[i] = (uint8_t) (i % 256);
+    }
+}
 
 
 
@@ -75,7 +81,7 @@ void init_vertex(graph_type::vertex_type& vertex) { vertex.data() = 1; }
  * graphlab::IS_POD_TYPE it must implement load and save functions.
  */
 class pagerank :
-  public graphlab::ivertex_program<graph_type, double> {
+    public graphlab::ivertex_program<graph_type, std::pair<double, std::vector<uint8_t> > > {
 
   double last_change;
 public:
@@ -92,7 +98,7 @@ public:
   /* Gather the weighted rank of the adjacent page   */
   double gather(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
-    return (edge.source().data() / edge.source().num_out_edges());
+    return (edge.source().data().first / edge.source().num_out_edges());
   }
 
   /* Use the total rank of adjacent pages to update this page */
@@ -100,8 +106,8 @@ public:
              const gather_type& total) {
 
     const double newval = (1.0 - RESET_PROB) * total + RESET_PROB;
-    last_change = (newval - vertex.data());
-    vertex.data() = newval;
+    last_change = (newval - vertex.data().first);
+    vertex.data().first = newval;
     if (ITERATIONS) context.signal(vertex);
   }
 
@@ -154,18 +160,18 @@ public:
 struct pagerank_writer {
   std::string save_vertex(graph_type::vertex_type v) {
     std::stringstream strm;
-    strm << v.id() << "\t" << v.data() << "\n";
+    strm << v.id() << "\t" << v.data().first << v.data().second.size() << "\n";
     return strm.str();
   }
   std::string save_edge(graph_type::edge_type e) { return ""; }
 }; // end of pagerank writer
 
 
-double map_rank(const graph_type::vertex_type& v) { return v.data(); }
+double map_rank(const graph_type::vertex_type& v) { return v.data().first; }
 
 
 double pagerank_sum(graph_type::vertex_type v) {
-  return v.data();
+  return v.data().first;
 }
 
 int main(int argc, char** argv) {
