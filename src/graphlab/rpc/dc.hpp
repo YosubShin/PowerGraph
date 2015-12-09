@@ -90,7 +90,7 @@ struct dc_init_param{
    *    |    |    |
    *    x    y    z
    */
-  std::vector<uint16_t> topologies;
+  std::vector<uint64_t> topologies;
 
   bool topologyaware;
 
@@ -231,7 +231,7 @@ class distributed_control{
              procid_t curmachineid,
              size_t numhandlerthreads,
              dc_comm_type commtype = RPC_DEFAULT_COMMTYPE,
-             std::vector<uint16_t> topologies = std::vector<uint16_t>(),
+             std::vector<uint64_t> topologies = std::vector<uint64_t>(),
              bool topology_aware = false);
 
   /// a pointer to the communications subsystem
@@ -246,7 +246,7 @@ class distributed_control{
   std::vector<atomic<size_t> > fcall_handler_active;
   dense_bitset fcall_handler_blockers;
 
-  std::vector<uint16_t> topologies_;
+  std::vector<uint64_t> topologies_;
   bool topology_aware_;
 
   struct fcallqueue_entry {
@@ -327,7 +327,7 @@ class distributed_control{
 
   ~distributed_control();
 
-  const std::vector<uint16_t> topologies() const {
+  const std::vector<uint64_t> topologies() const {
     return topologies_;
   }
 

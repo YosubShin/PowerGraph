@@ -55,7 +55,7 @@
 
 namespace graphlab {
 
-  std::string topology_to_str(const uint16_t& topology) {
+  std::string topology_to_str(const uint64_t& topology) {
     std::ostringstream stream;
     stream << "(" << ((topology >> 10) & 0x1F) <<
       ", " << ((topology >> 5) & 0x1F) <<
@@ -500,7 +500,7 @@ void distributed_control::init(const std::vector<std::string> &machines,
             procid_t curmachineid,
             size_t numhandlerthreads,
             dc_comm_type commtype,
-            std::vector<uint16_t> topologies,
+            std::vector<uint64_t> topologies,
             bool topologyaware) {
 
   if (numhandlerthreads == RPC_DEFAULT_NUMHANDLERTHREADS) {
