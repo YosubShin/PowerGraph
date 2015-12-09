@@ -44,28 +44,35 @@ struct vdata {
     vdata() : first(0), second() {}
 
     vdata(double f, const std::vector<uint8_t>& s) : first(f), second() {
+        std::cout << "Begin vdata(double f, const std::vector<uint8_t>& s)\n";
         for (size_t i = 0; i < s.size(); ++i) {
             second[i] += s[i];
         }
+        std::cout << "End vdata(double f, const std::vector<uint8_t>& s)\n";
     }
 
     vdata& operator+=(const vdata& other) {
+        std::cout << "Begin operator+=(const vdata& other)\n";
         first += other.first;
         for (size_t i = 0; i < std::min(second.size(), other.second.size()); ++i) {
             second[i] += other.second[i];
         }
+        std::cout << "End operator+=(const vdata& other)\n";
         return *this;
     }
 
     void save(graphlab::oarchive& oarc) const {
+        std::cout << "Begin save(graphlab::oarchive& oarc)\n";
         oarc << first;
         oarc << second.size();
         for (size_t i = 0; i < second.size(); ++i) {
             oarc << second[i];
         }
+        std::cout << "End save(graphlab::oarchive& oarc)\n";
     }
 
     void load(graphlab::iarchive& iarc) {
+        std::cout << "Begin load(graphlab::iarchive& iarc)\n";
         second.clear();
         iarc >> first;
         size_t size = 0;
@@ -75,6 +82,7 @@ struct vdata {
             iarc >> element;
             second.push_back(element);
         }
+        std::cout << "End load(graphlab::iarchive& iarc)\n";
     }
 };
 
@@ -92,11 +100,13 @@ typedef graphlab::distributed_graph<vertex_data_type, edge_data_type> graph_type
  * to initialize the vertes data.
  */
 void init_vertex(graph_type::vertex_type& vertex) {
+    std::cout << "Begin init_vertex(graph_type::vertex_type& vertex)\n";
     vertex.data().first = 1;
     vertex.data().second.resize(1024);
     for (size_t i = 0; vertex.data().second.size(); ++i) {
         vertex.data().second[i] = (uint8_t) (i % 256);
     }
+    std::cout << "End init_vertex(graph_type::vertex_type& vertex)\n";
 }
 
 /*
