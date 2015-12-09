@@ -283,6 +283,8 @@ int main(int argc, char** argv) {
 
   if (dc.procid() == 0) {
     const std::string output_filename = "/projects/sciteam/jsb/shin1/output.csv";
+    bool file_exists = std::ifstream(output_filename);
+
     std::ofstream ofs;
     ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
     if (!ofs.is_open()) {
@@ -304,7 +306,9 @@ int main(int argc, char** argv) {
 
     double variance_local_edges = graph.variance_num_local_edges();
 
-    // algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,master2mirror_hops,average_local_own_nverts,variance_local_own_nverts,average_local_edges,variance_local_edges
+    if (!file_exists) {
+      ofs << "algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,master2mirror_hops,average_local_own_nverts,variance_local_own_nverts,average_local_edges,variance_local_edges" << std::endl;
+    }
     ofs << "pagerank," << ingress_method << "," << ITERATIONS << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << variance_local_own_nverts << "," << average_local_edges << "," << variance_local_edges << std::endl;
 
     ofs.close();

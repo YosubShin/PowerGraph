@@ -273,7 +273,6 @@ size_t absolute_vertex_data_with_hash(
 
 int main(int argc, char** argv) {
   std::cout << "Approximate graph diameter\n\n";
-  graphlab::mpi_tools::init(argc, argv);
   graphlab::distributed_control dc;
 
   std::string datafile;
@@ -306,26 +305,29 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  graphlab::timer load_timer;
+  graphlab::timer timer;
 
   //load graph
   graph_type graph(dc, clopts);
   dc.cout() << "Loading graph in format: "<< format << std::endl;
   graph.load_format(graph_dir, format);
+
+  double load_time = timer.current_time();
+  timer.start();
+
   graph.finalize();
 
-  double load_elapsed_secs = load_timer.current_time();
-  std::cout << "Load: " << load_elapsed_secs << " seconds." << std::endl;
+  double finalize_time = timer.current_time();
+  double ingress_time = load_time + finalize_time;
 
-  time_t start, end;
-  //initialize vertices
-  time(&start);
   if (use_sketch == false)
     graph.transform_vertices(initialize_vertex);
   else
     graph.transform_vertices(initialize_vertex_with_hash);
 
   graphlab::omni_engine<one_hop> engine(dc, graph, exec_type, clopts);
+
+  timer.start();
 
   //main iteration
   size_t previous_count = 0;
@@ -353,32 +355,57 @@ int main(int argc, char** argv) {
     }
     previous_count = current_count;
   }
-  time(&end);
+  const double runtime = timer.current_time();
 
-  const float runtime = (end - start);
+  // dc.cout() << "graph calculation time is " << (end - start) << " sec\n";
+  // dc.cout() << "The approximate diameter is " << diameter << "\n";
 
-  dc.cout() << "graph calculation time is " << (end - start) << " sec\n";
-  dc.cout() << "The approximate diameter is " << diameter << "\n";
+  // const std::string output_filename = "/home/yosub_shin_0/output.csv";
+  // std::ofstream ofs;
+  // ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
+  // if (!ofs.is_open()) {
+  //   std::cout << "Failed to open output file.\n";
+  //   return EXIT_FAILURE;
+  // }
+  // std::string ingress_method = "";
+  // clopts.get_graph_args().get_option("ingress", ingress_method);
 
-  graphlab::mpi_tools::finalize();
+  // // algorithm, partitioning_strategy, num_iterations, loading_time, partitioning_time, computation_time, total_time
+  // ofs << "approximate_diameter," << ingress_method << "," << tolerance << "," << load_elapsed_secs << ",0," << runtime << "," << (load_elapsed_secs + runtime) << std::endl;
 
-  const std::string output_filename = "/home/yosub_shin_0/output.csv";
-  std::ofstream ofs;
-  ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
-  if (!ofs.is_open()) {
-    std::cout << "Failed to open output file.\n";
-    return EXIT_FAILURE;
-  }
-  std::string ingress_method = "";
-  clopts.get_graph_args().get_option("ingress", ingress_method);
+  // ofs.close();
 
   double tolerance = 0.0;
   clopts.get_graph_args().get_option("tol", tolerance);
 
-  // algorithm, partitioning_strategy, num_iterations, loading_time, partitioning_time, computation_time, total_time
-  ofs << "approximate_diameter," << ingress_method << "," << tolerance << "," << load_elapsed_secs << ",0," << runtime << "," << (load_elapsed_secs + runtime) << std::endl;
+  if (dc.procid() == 0) {
+    const std::string output_filename = "/projects/sciteam/jsb/shin1/output.csv";
+    bool file_exists = std::ifstream(output_filename);
 
-  ofs.close();
+    std::ofstream ofs;
+    ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
+    if (!ofs.is_open()) {
+      std::cout << "Failed to open output file.\n";
+      return EXIT_FAILURE;
+    }
+    std::string ingress_method = "";
+    clopts.get_graph_args().get_option("ingress", ingress_method);
+
+    const double replication_factor = (double)graph.num_replicas()/graph.num_vertices();
+    bool topology_aware = dc.topology_aware();
+    double num_master2mirror_hops = (double) graph.num_master2mirror_hops() / graph.num_vertices();
+    double average_local_own_nverts = graph.average_num_local_own_vertices();
+    double variance_local_own_nverts = graph.variance_num_local_own_vertices();
+    double average_local_edges = graph.average_num_local_edges();
+    double variance_local_edges = graph.variance_num_local_edges();
+
+    if (!file_exists) {
+      ofs << "algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,master2mirror_hops,average_local_own_nverts,variance_local_own_nverts,average_local_edges,variance_local_edges" << std::endl;
+    }
+    ofs << "approximate_diameter," << ingress_method << "," << tolerance << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << variance_local_own_nverts << "," << average_local_edges << "," << variance_local_edges << std::endl;
+
+    ofs.close();
+  }  
 
   return EXIT_SUCCESS;
 }
