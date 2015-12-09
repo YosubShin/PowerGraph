@@ -173,15 +173,15 @@ namespace graphlab {
          size_t minedges = *std::min_element(proc_num_edges.begin(), proc_num_edges.end());
          size_t maxedges = *std::max_element(proc_num_edges.begin(), proc_num_edges.end());
 
-         const uint16_t src_coord = dc_.topologies()[graph_hash::hash_vertex(source) % numprocs];
-         const uint16_t dst_coord = dc_.topologies()[graph_hash::hash_vertex(target) % numprocs];
-         const size_t shortest_dist = coords2dist[((src_coord << 16) | dst_coord)];
+         const uint32_t src_coord_shftd = dc_.topologies()[graph_hash::hash_vertex(source) % numprocs] << 16;
+         const uint32_t dst_coord_shftd = dc_.topologies()[graph_hash::hash_vertex(target) % numprocs] << 16;
+         const size_t shortest_dist = coords2dist[(src_coord_shftd | (dst_coord >> 16))];
 
          for (size_t i = 0; i < numprocs; ++i) {
-             size_t sd = src_degree.get(i) + (usehash && (source % numprocs == i));
-             size_t td = dst_degree.get(i) + (usehash && (target % numprocs == i));
-             size_t src_dist = coords2dist[((src_coord << 16) | dc_.topologies()[i])];
-             size_t dst_dist = coords2dist[((dst_coord << 16) | dc_.topologies()[i])];
+	   size_t sd = src_degree.get(i);
+	   size_t td = dst_degree.get(i);
+	   size_t src_dist = coords2dist[(src_coord_shftd | dc_.topologies()[i])];
+	   size_t dst_dist = coords2dist[(dst_coord_shftd | dc_.topologies()[i])];
              double bal = (maxedges - proc_num_edges[i])/(epsilon + maxedges - minedges);
              proc_score[i] = bal + ((sd > 0) + (td > 0)) // original terms (load balance + greedy)
 	       + (2.0 * shortest_dist - (src_dist + dst_dist)) / 30.0 * (2.0 * epsilon + shortest_dist) // minimize src_dist + dst_dist
