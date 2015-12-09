@@ -141,9 +141,6 @@ namespace graphlab {
       vertex_exchange(dc), edge_exchange(dc),
 #endif
       edge_decision(dc) {
-        std::vector<std::vector<int> > topologies = rpc.dc().topologies();
-        ASSERT_GT(topologies.size(), 0);
-
       rpc.barrier();
     } // end of constructor
 
@@ -587,12 +584,12 @@ namespace graphlab {
       foreach(const vertex_record& record, graph.lvid2record) {
         if(record.owner == rpc.procid()) {
             ++graph.local_own_nverts;
-            std::vector<int> master_coord = rpc.dc().topologies()[rpc.procid()];
+            const uint16_t master_coord = rpc.dc().topologies()[rpc.procid()];
             uint64_t hops_sum = 0;
             uint64_t hops = 0;
             foreach(const procid_t& mirror, record.mirrors()) {
                 hops = 0;
-                std::vector<int> mirror_coord = rpc.dc().topologies()[mirror];
+                const uint16_t mirror_coord = rpc.dc().topologies()[mirror];
                 if (rpc.procid() == mirror) {
                     // Same proc as master
                     continue;
@@ -600,10 +597,7 @@ namespace graphlab {
                     // Different procs on same Gemini; Calculate as one hop
                     ++hops;
                 } else {
-                    for (size_t i = 0; i < 3; ++i) {
-                        int dist = abs(master_coord[i] - mirror_coord[i]);
-                        hops += std::min(dist, 23 - dist);
-                    }
+		  hops += coords_pair_dist(master_coord, mirror_coord);
                 }
               ////  std::cout << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << ") to ";
               ////  std::cout << "(" << mirror_coord[0] << "," << mirror_coord[1] << "," << mirror_coord[2] << "): " << hops << " hops\n";
