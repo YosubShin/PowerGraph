@@ -283,7 +283,7 @@ int main(int argc, char** argv) {
 
   if (dc.procid() == 0) {
     const std::string output_filename = "/projects/sciteam/jsb/shin1/output.csv";
-    bool file_exists = std::ifstream(output_filename);
+    bool file_exists = boost::filesystem::exists(output_filename);
 
     std::ofstream ofs;
     ofs.open(output_filename.c_str(), std::ios::out | std::ios::app);
