@@ -43,7 +43,15 @@ struct vdata {
 
     vdata() : first(0), second() {}
 
-    vdata(double f, std::vector<uint8_t>& s) : first(f), second(s) {}
+    vdata(double f, const std::vector<uint8_t>& s) : first(f), second(s) {}
+
+    vdata& operator+=(const vdata& other) {
+        first += other.first;
+        for (size_t i = 0; i < std::min(second.size(), other.second.size()); ++i) {
+            second[i] += other.second[i];
+        }
+        return *this;
+    }
 
     void save(graphlab::oarchive& oarc) const {
         oarc << first;
