@@ -129,7 +129,7 @@ public:
   void scatter(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
     if(USE_DELTA_CACHE) {
-      context.post_delta(edge.target(), last_change);
+        context.post_delta(edge.target(), std::pair<double, std::vector<uint8_t> >(last_change, vertex.data().second));
     }
 
     if(last_change > TOLERANCE || last_change < -TOLERANCE) {
