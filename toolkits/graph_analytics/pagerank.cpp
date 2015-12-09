@@ -45,7 +45,7 @@ struct vdata {
 
     vdata(double f, const std::vector<uint8_t>& s) : first(f), second() {
         for (size_t i = 0; i < s.size(); ++i) {
-            second[i] += s.second[i];
+            second[i] += s[i];
         }
     }
 
