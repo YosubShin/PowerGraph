@@ -28,6 +28,7 @@
 #include <graphlab/rpc/distributed_event_log.hpp>
 #include <graphlab/util/dense_bitset.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+#include <hash_map>
 
 namespace graphlab {
   template<typename VertexData, typename EdgeData>
@@ -62,7 +63,7 @@ namespace graphlab {
  
  private:
      distributed_control& dc_;
-     boost::unordered_map<uint32_t, size_t> coords2dist;
+     hash_map<uint32_t, size_t> coords2dist;
  
     public:
       /** \brief A decision object for computing the edge assingment. */
