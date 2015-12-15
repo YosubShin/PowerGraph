@@ -296,21 +296,39 @@ int main(int argc, char** argv) {
                        "If true, will use Flajolet & Martin bitmask, "
                        "which is more compact and faster.");
 
+  size_t powerlaw = 0;
+  clopts.attach_option("powerlaw", powerlaw,
+                       "Generate a synthetic powerlaw out-degree graph. ");
+  double alpha = 2.1;
+  clopts.attach_option("alpha", alpha,
+                       "Generate a synthetic powerlaw graph with alpha parameter. ");
+
+  size_t indegree = 0;
+  clopts.attach_option("indegree", indegree,
+                       "Generate a synthetic powerlaw in-degree graph if set to 1. ");
+  bool is_indegree = indegree > 0;
+
   if (!clopts.parse(argc, argv)){
     dc.cout() << "Error in parsing command line arguments." << std::endl;
     return EXIT_FAILURE;
   }
-  if (graph_dir == "") {
-    std::cout << "--graph is not optional\n";
-    return EXIT_FAILURE;
-  }
+  // if (graph_dir == "") {
+  //   std::cout << "--graph is not optional\n";
+  //   return EXIT_FAILURE;
+  // }
 
   graphlab::timer timer;
 
   //load graph
   graph_type graph(dc, clopts);
-  dc.cout() << "Loading graph in format: "<< format << std::endl;
-  graph.load_format(graph_dir, format);
+  if(powerlaw > 0) { // make a synthetic graph
+      dc.cout() << "Loading synthetic Powerlaw graph." << std::endl;
+      graph.load_synthetic_powerlaw(powerlaw, is_indegree, alpha, 100000000);
+  }
+  else if (graph_dir.length() > 0) { // Load the graph from a file
+      dc.cout() << "Loading graph in format: "<< format << std::endl;
+      graph.load_format(graph_dir, format);
+  }
 
   double load_time = timer.current_time();
   timer.start();
