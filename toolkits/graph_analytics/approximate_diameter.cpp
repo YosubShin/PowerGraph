@@ -357,8 +357,9 @@ int main(int argc, char** argv) {
   }
   const double runtime = timer.current_time();
 
-  // dc.cout() << "graph calculation time is " << (end - start) << " sec\n";
-  // dc.cout() << "The approximate diameter is " << diameter << "\n";
+  dc.cout() << "The approximate diameter is " << diameter << "\n";
+
+  // dc.cout() << "graph calculation time is " << (end - start) << " sec\n";  
 
   // const std::string output_filename = "/home/yosub_shin_0/output.csv";
   // std::ofstream ofs;
@@ -374,9 +375,6 @@ int main(int argc, char** argv) {
   // ofs << "approximate_diameter," << ingress_method << "," << tolerance << "," << load_elapsed_secs << ",0," << runtime << "," << (load_elapsed_secs + runtime) << std::endl;
 
   // ofs.close();
-
-  double tolerance = 0.0;
-  clopts.get_graph_args().get_option("tol", tolerance);
 
   if (dc.procid() == 0) {
     const std::string output_filename = "/projects/sciteam/jsb/shin1/output.csv";
@@ -402,7 +400,7 @@ int main(int argc, char** argv) {
     if (!file_exists) {
       ofs << "algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,master2mirror_hops,average_local_own_nverts,variance_local_own_nverts,average_local_edges,variance_local_edges" << std::endl;
     }
-    ofs << "approximate_diameter," << ingress_method << "," << tolerance << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << variance_local_own_nverts << "," << average_local_edges << "," << variance_local_edges << std::endl;
+    ofs << "approximate_diameter," << ingress_method << "," << termination_criteria << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << variance_local_own_nverts << "," << average_local_edges << "," << variance_local_edges << std::endl;
 
     ofs.close();
   }  
