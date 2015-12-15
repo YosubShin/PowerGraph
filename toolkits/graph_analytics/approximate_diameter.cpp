@@ -391,7 +391,7 @@ int main(int argc, char** argv) {
 
     const double replication_factor = (double)graph.num_replicas()/graph.num_vertices();
     bool topology_aware = dc.topology_aware();
-    double num_master2mirror_hops = (double) graph.num_master2mirror_hops() / graph.num_vertices();
+    double num_master2mirror_hops = (double) graph.num_master2mirror_hops() / graph.num_replicas();
     double average_local_own_nverts = graph.average_num_local_own_vertices();
     double variance_local_own_nverts = graph.variance_num_local_own_vertices();
     double average_local_edges = graph.average_num_local_edges();

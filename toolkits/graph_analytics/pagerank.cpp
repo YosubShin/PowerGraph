@@ -296,7 +296,7 @@ int main(int argc, char** argv) {
 
     bool topology_aware = dc.topology_aware();
 
-    double num_master2mirror_hops = (double) graph.num_master2mirror_hops() / graph.num_vertices();
+    double num_master2mirror_hops = (double) graph.num_master2mirror_hops() / graph.num_replicas();
 
     double average_local_own_nverts = graph.average_num_local_own_vertices();
 

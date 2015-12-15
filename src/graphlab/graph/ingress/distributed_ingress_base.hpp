@@ -674,7 +674,7 @@ namespace graphlab {
                             << "\n\t nedges: " << graph.num_edges()
                             << "\n\t nreplicas: " << graph.nreplicas
                             << "\n\t replication factor: " << (double)graph.nreplicas/graph.num_vertices()
-                            << "\n\t number of hops b/w master-mirrors: " << (double)graph.master2mirror_hops / graph.num_vertices()
+                            << "\n\t number of hops b/w master-mirrors: " << (double)graph.master2mirror_hops / graph.nreplicas
                             << "\n\t average number of local master vertices: " << graph.average_local_own_nverts
                             << "\n\t variance of number of local master vertices: " << graph.variance_local_own_nverts
                             << "\n\t average number of local edges: " << graph.average_local_edges
