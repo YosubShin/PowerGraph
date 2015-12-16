@@ -580,6 +580,7 @@ namespace graphlab {
     void exchange_global_info () {
       // Count the number of vertices owned locally
       graph.local_own_nverts = 0;
+      graph.local_own_verts_mirrors = 0;
       foreach(const vertex_record& record, graph.lvid2record) {
         if(record.owner == rpc.procid()) {
             ++graph.local_own_nverts;
@@ -601,6 +602,7 @@ namespace graphlab {
               ////  std::cout << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << ") to ";
               ////  std::cout << "(" << mirror_coord[0] << "," << mirror_coord[1] << "," << mirror_coord[2] << "): " << hops << " hops\n";
                 hops_sum += hops;
+                graph.local_own_verts_mirrors++;
             }
             graph.local_master2mirror_hops += hops_sum;
           ////  std::cout << "vid" << record.gvid << " with master " << record.owner << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << "): total hops: " << hops_sum << std::endl;
@@ -625,6 +627,12 @@ namespace graphlab {
       rpc.all_gather(swap_counts);
       graph.nverts = 0;
       foreach(size_t count, swap_counts) graph.nverts += count;
+
+      // compute mirror count
+      swap_counts[rpc.procid()] = graph.num_local_own_vertices_mirrors();
+      rpc.all_gather(swap_counts);
+      graph.nmirrors = 0;
+      foreach(size_t count, swap_counts) graph.nmirrors += count;
 
       // compute replicas
       swap_counts[rpc.procid()] = graph.num_local_vertices();
@@ -674,7 +682,7 @@ namespace graphlab {
                             << "\n\t nedges: " << graph.num_edges()
                             << "\n\t nreplicas: " << graph.nreplicas
                             << "\n\t replication factor: " << (double)graph.nreplicas/graph.num_vertices()
-                            << "\n\t number of hops b/w master-mirrors: " << (double)graph.master2mirror_hops / graph.nreplicas
+                            << "\n\t number of hops b/w master-mirrors: " << (double)graph.master2mirror_hops / graph.nmirrors
                             << "\n\t average number of local master vertices: " << graph.average_local_own_nverts
                             << "\n\t variance of number of local master vertices: " << graph.variance_local_own_nverts
                             << "\n\t average number of local edges: " << graph.average_local_edges

@@ -2679,6 +2679,10 @@ namespace graphlab {
      *\brief Get the number of vertices owned by this proc */
     size_t num_local_own_vertices() const { return local_own_nverts; }
 
+    size_t num_local_own_vertices_mirrors() const { return local_own_verts_mirrors; }
+
+    size_t num_mirrors() const { return nmirrors; }
+
     uint64_t num_master2mirror_hops() const { return master2mirror_hops; }
 
       double average_num_local_own_vertices() const { return average_local_own_nverts; }
@@ -3167,6 +3171,10 @@ namespace graphlab {
 
     /** The number of vertices owned by this proc */
     size_t local_own_nverts;
+
+    size_t local_own_nverts_mirrors;
+
+    size_t nmirrors;
 
     uint64_t master2mirror_hops;
 
