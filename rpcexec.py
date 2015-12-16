@@ -100,6 +100,7 @@ def shell_wait_native(cmd):
 nmachines = 0
 hostsfile = ''
 topologyaware = 0
+topology_weight = '0.1'
 prog = ''
 opts = ''
 gui = 0
@@ -126,7 +127,8 @@ while(i < len(sys.argv)):
     i = i + 2
   elif sys.argv[i] == '-t':
     topologyaware = 1
-    i = i + 1
+    topology_weight = sys.argv[i+1]
+    i = i + 2
   else:
     prog = sys.argv[i]
     if (len(sys.argv) > i+1):
@@ -225,7 +227,7 @@ f.close()
 custom_environments += ' TOPOLOGIES_FILE=%s/topologies' % project_home
 
 if topologyaware == 1:
-  custom_environments += ' TOPOLOGY_AWARE=1 '
+  custom_environments += ' TOPOLOGY_AWARE=1 TOPOLOGY_WEIGHT=' + topology_weight
 
 # the commands to run to start for each node
 cmd = [None] * nmachines

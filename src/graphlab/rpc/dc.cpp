@@ -149,7 +149,8 @@ distributed_control::distributed_control() {
         initparam.numhandlerthreads,
         initparam.commtype,
         initparam.topologies,
-        initparam.topologyaware);
+        initparam.topologyaware,
+        initparam.topology_weight);
   INITIALIZE_TRACER(dc_receive_queuing, "dc: time spent on enqueue");
   INITIALIZE_TRACER(dc_receive_multiplexing, "dc: time spent exploding a chunk");
   INITIALIZE_TRACER(dc_call_dispatch, "dc: time spent issuing RPC calls");
@@ -162,7 +163,8 @@ distributed_control::distributed_control(dc_init_param initparam) {
         initparam.numhandlerthreads,
         initparam.commtype,
         initparam.topologies,
-        initparam.topologyaware);
+        initparam.topologyaware,
+        initparam.topology_weight);
   INITIALIZE_TRACER(dc_receive_queuing, "dc: time spent on enqueue");
   INITIALIZE_TRACER(dc_receive_multiplexing, "dc: time spent exploding a chunk");
   INITIALIZE_TRACER(dc_call_dispatch, "dc: time spent issuing RPC calls");
@@ -501,7 +503,8 @@ void distributed_control::init(const std::vector<std::string> &machines,
             size_t numhandlerthreads,
             dc_comm_type commtype,
             std::vector<uint64_t> topologies,
-            bool topologyaware) {
+            bool topologyaware,
+            double topology_weight) {
 
   if (numhandlerthreads == RPC_DEFAULT_NUMHANDLERTHREADS) {
     // autoconfigure
@@ -619,6 +622,8 @@ void distributed_control::init(const std::vector<std::string> &machines,
 
   topologies_ = topologies;
   topology_aware_ = topologyaware;
+  topology_weight_ = topology_weight;
+
   ASSERT_GT(topologies_.size(), 0);
   if (procid() == 0) {
     for (size_t i = 0; i < topologies_.size(); ++i) {

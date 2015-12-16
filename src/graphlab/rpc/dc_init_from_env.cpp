@@ -40,6 +40,10 @@ bool init_param_from_env(dc_init_param& param) {
 
   char* topologyaware = getenv("TOPOLOGY_AWARE");
   param.topologyaware = topologyaware != NULL;
+  if (param.topologyaware) {
+    std::string topology_weight = getenv("TOPOLOGY_WEIGHT");
+    param.topology_weight = fromstr(topology_weight);  
+  }
 
   char* nodes = getenv("SPAWNNODES");
   std::string nodesstr = nodes;

@@ -96,6 +96,8 @@ struct dc_init_param{
 
   bool topologyaware;
 
+  double topology_weight;
+
   /** Additional construction options of the form
     "key1=value1,key2=value2".
 
@@ -234,7 +236,8 @@ class distributed_control{
              size_t numhandlerthreads,
              dc_comm_type commtype = RPC_DEFAULT_COMMTYPE,
              std::vector<uint64_t> topologies = std::vector<uint64_t>(),
-             bool topology_aware = false);
+             bool topology_aware = false,
+             double topology_weight = 0.1);
 
   /// a pointer to the communications subsystem
   dc_impl::dc_comm_base* comm;
@@ -250,6 +253,7 @@ class distributed_control{
 
   std::vector<uint64_t> topologies_;
   bool topology_aware_;
+  double topology_weight_;
 
   struct fcallqueue_entry {
     std::vector<function_call_block> calls;
@@ -336,6 +340,10 @@ class distributed_control{
   const bool topology_aware() const {
       return topology_aware_;
   }
+
+  const double topology_weight() const {
+      return topology_weight_;
+  }  
 
   // The procid of the last distributed_control object created
   // this is quite legacy stuff when we technically permitted multiple DC
