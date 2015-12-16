@@ -40,6 +40,7 @@ bool init_param_from_env(dc_init_param& param) {
 
   char* topologyaware = getenv("TOPOLOGY_AWARE");
   param.topologyaware = topologyaware != NULL;
+  param.topology_weight = 0.1;
   if (param.topologyaware) {
     std::string topology_weight = getenv("TOPOLOGY_WEIGHT");
     param.topology_weight = fromstr<double>(topology_weight);  
