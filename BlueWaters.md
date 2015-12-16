@@ -15,7 +15,8 @@ module load rca
 export CC=/opt/gcc/4.9.3/bin/gcc
 export CXX=/opt/gcc/4.9.3/bin/g++
 
-export PROJECT_HOME=/projects/sciteam/jsb/shin1
+# Change directory to work directory. If you don't have your own work directory, create one as /projects/sciteam/jsb/<your_user_name>
+export PROJECT_HOME=/projects/sciteam/jsb/$USER
 
 # Create a nodes list file
 cat $HOME/.crayccm/ccm_nodelist.* | sort -u > $PROJECT_HOME/machines
