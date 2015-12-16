@@ -350,7 +350,8 @@ int main(int argc, char** argv) {
   //main iteration
   size_t previous_count = 0;
   size_t diameter = 0;
-  for (size_t iter = 0; iter < 100; ++iter) {
+  size_t iter = 0;
+  for (iter = 0; iter < 100; ++iter) {
     engine.signal_all();
     engine.start();
 
@@ -418,9 +419,9 @@ int main(int argc, char** argv) {
     double variance_local_edges = graph.variance_num_local_edges();
 
     if (!file_exists) {
-      ofs << "algorithm,partitioning_strategy,num_iterations,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,master2mirror_hops,average_local_own_nverts,variance_local_own_nverts,average_local_edges,variance_local_edges" << std::endl;
+      ofs << "algorithm,partitioning_strategy,num_iterations,alpha,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,master2mirror_hops,average_local_own_nverts,variance_local_own_nverts,average_local_edges,variance_local_edges" << std::endl;
     }
-    ofs << "approximate_diameter," << ingress_method << "," << termination_criteria << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << variance_local_own_nverts << "," << average_local_edges << "," << variance_local_edges << std::endl;
+    ofs << "approximate_diameter," << ingress_method << "," << iter << "," << alpha << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << variance_local_own_nverts << "," << average_local_edges << "," << variance_local_edges << std::endl;
 
     ofs.close();
   }  
