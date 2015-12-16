@@ -552,12 +552,12 @@ namespace graphlab {
                 } else {
 		                hops = coords_pair_dist(master_coord, mirror_coord);
                 }
-                std::cout << topology_to_str(master_coord) << " to " << topology_to_str(mirror_coord) <<  ": " << hops << " hops\n";
+                ////  std::cout << topology_to_str(master_coord) << " to " << topology_to_str(mirror_coord) <<  ": " << hops << " hops\n";
                 hops_sum += hops;
                 graph.local_own_verts_mirrors += 1;
             }
             graph.local_master2mirror_hops += hops_sum;
-            std::cout << "vid" << record.gvid << " with master " << record.owner << topology_to_str(master_coord) << ": total hops: " << hops_sum << std::endl;
+            ////  std::cout << "vid" << record.gvid << " with master " << record.owner << topology_to_str(master_coord) << ": total hops: " << hops_sum << std::endl;
         }
       }
 
@@ -572,7 +572,7 @@ namespace graphlab {
       graph.nedges = 0;
       foreach(size_t count, swap_counts) graph.nedges += count;
 
-      std::cout << "At proc" << rpc.procid() << ": number of local edges is " << graph.num_local_edges() << std::endl;
+      ////  std::cout << "At proc" << rpc.procid() << ": number of local edges is " << graph.num_local_edges() << std::endl;
 
       // compute vertex count
       swap_counts[rpc.procid()] = graph.num_local_own_vertices();
@@ -599,7 +599,7 @@ namespace graphlab {
         graph.master2mirror_hops = 0;
         foreach(uint64_t count, swap_counts_uint64) graph.master2mirror_hops += count;
 
-        std::cout << "At proc" << rpc.procid() << ": number of master vertices is " << graph.local_own_nverts << std::endl;
+        ////  std::cout << "At proc" << rpc.procid() << ": number of master vertices is " << graph.local_own_nverts << std::endl;
 
         // Average number of local master vertices
         swap_counts_uint64[rpc.procid()] = graph.local_own_nverts;
