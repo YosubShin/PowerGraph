@@ -413,6 +413,7 @@ int main(int argc, char** argv) {
 
     const double replication_factor = (double)graph.num_replicas()/graph.num_vertices();
     bool topology_aware = dc.topology_aware();
+    double topology_weight = dc.topology_weight();
     double num_master2mirror_hops = (double) graph.num_master2mirror_hops() / graph.num_mirrors();
     double average_local_own_nverts = graph.average_num_local_own_vertices();
     double stddev_local_own_nverts = sqrt(graph.variance_num_local_own_vertices());
@@ -420,9 +421,9 @@ int main(int argc, char** argv) {
     double stddev_local_edges = sqrt(graph.variance_num_local_edges());
 
     if (!file_exists) {
-      ofs << "algorithm,partitioning_strategy,num_iterations,alpha,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,master2mirror_hops,average_local_own_nverts,stddev_local_own_nverts,average_local_edges,stddev_local_edges" << std::endl;
+      ofs << "algorithm,partitioning_strategy,num_iterations,alpha,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,topology_weight,master2mirror_hops,average_local_own_nverts,stddev_local_own_nverts,average_local_edges,stddev_local_edges" << std::endl;
     }
-    ofs << "approximate_diameter," << ingress_method << "," << iter << "," << alpha << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << stddev_local_own_nverts << "," << average_local_edges << "," << stddev_local_edges << std::endl;
+    ofs << "approximate_diameter," << ingress_method << "," << iter << "," << alpha << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << topology_weight << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << stddev_local_own_nverts << "," << average_local_edges << "," << stddev_local_edges << std::endl;
 
     ofs.close();
   }  
