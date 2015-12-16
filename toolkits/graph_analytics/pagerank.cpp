@@ -282,7 +282,9 @@ int main(int argc, char** argv) {
   std::cout << "Totalpr = " << totalpr << "\n";
 
   if (dc.procid() == 0) {
-    const std::string output_filename = "/projects/sciteam/jsb/shin1/output.csv";
+    char* username = getenv("USER");
+    std::string username_str = username;
+    const std::string output_filename = "/projects/sciteam/jsb/" + username + "/output.csv";
     bool file_exists = boost::filesystem::exists(output_filename);
 
     std::ofstream ofs;

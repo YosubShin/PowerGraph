@@ -5,7 +5,7 @@ import string
 import subprocess
 import time
 
-project_home = '/projects/sciteam/jsb/shin1'
+project_home = '/projects/sciteam/jsb/' + os.environ['USER']
 custom_environments = 'CC=/opt/gcc/4.9.3/bin/gcc CXX=/opt/gcc/4.9.3/bin/g++ PATH=$PATH:%s/openmpi/bin LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%s/openmpi/lib' % (project_home, project_home)
 
 """
