@@ -36,14 +36,14 @@ namespace graphlab {
   class distributed_graph;
 
   static size_t coords_pair_dist(const uint16_t& src, const uint16_t& dst) {
-    std::cout << "coords_pair_dist:" << topology_to_str(src) << " to " << topology_to_str(dst) << std::endl;
+    // std::cout << "coords_pair_dist:" << topology_to_str(src) << " to " << topology_to_str(dst) << std::endl;
     size_t dist = 0;
     for (size_t j = 0; j < 3; ++j) {
     	int src_val = (int)(src >> (10 - 5 * j)) & 0x1F;
     	int dst_val = (int)(dst >> (10 - 5 * j)) & 0x1F;
     	size_t absval = std::abs(src_val - dst_val);
     	dist += std::min(absval, 23 - absval);
-      std::cout << "j=" << j << ", src_val=" << src_val << ", dst_val=" << dst_val << ", absval=" << absval << ", dist=" << dist << std::endl;
+      // std::cout << "j=" << j << ", src_val=" << src_val << ", dst_val=" << dst_val << ", absval=" << absval << ", dist=" << dist << std::endl;
     }
     return dist;
   }
