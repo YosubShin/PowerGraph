@@ -219,9 +219,9 @@ namespace graphlab {
           ASSERT_NE(min_hops_sum, 1000000);
           ASSERT_FALSE(centroid_procs.empty());
 
-        ////  std::cout << "Calculated centroid:" << centroid_proc << " (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
+        std::cout << "Calculated centroid:" << centroid_proc << " (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
           foreach(const procid_t& mirror, mirrors) {
-            ////  std::cout << "(" << topologies[mirror][0] << "," << topologies[mirror][1] << "," << topologies[mirror][2] << "), ";
+            std::cout << "(" << topologies[mirror][0] << "," << topologies[mirror][1] << "," << topologies[mirror][2] << "), ";
           }
 
 
@@ -601,13 +601,13 @@ namespace graphlab {
                 } else {
 		  hops += coords_pair_dist(master_coord, mirror_coord);
                 }
-              ////  std::cout << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << ") to ";
-              ////  std::cout << "(" << mirror_coord[0] << "," << mirror_coord[1] << "," << mirror_coord[2] << "): " << hops << " hops\n";
+              std::cout << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << ") to ";
+              std::cout << "(" << mirror_coord[0] << "," << mirror_coord[1] << "," << mirror_coord[2] << "): " << hops << " hops\n";
                 hops_sum += hops;
                 graph.local_own_verts_mirrors += 1;
             }
             graph.local_master2mirror_hops += hops_sum;
-          ////  std::cout << "vid" << record.gvid << " with master " << record.owner << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << "): total hops: " << hops_sum << std::endl;
+          std::cout << "vid" << record.gvid << " with master " << record.owner << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << "): total hops: " << hops_sum << std::endl;
         }
       }
 
