@@ -540,18 +540,17 @@ namespace graphlab {
             ++graph.local_own_nverts;
             const uint16_t master_coord = rpc.dc().topologies()[rpc.procid()];
             uint64_t hops_sum = 0;
-            uint64_t hops = 0;
             foreach(const procid_t& mirror, record.mirrors()) {
-                hops = 0;
+                uint64_t hops = 0;
                 const uint16_t mirror_coord = rpc.dc().topologies()[mirror];
                 if (rpc.procid() == mirror) {
                     // Same proc as master
                     continue;
                 } else if (rpc.procid() != mirror && master_coord == mirror_coord) {
                     // Different procs on same Gemini; Calculate as one hop
-                    ++hops;
+                    hops = 1;
                 } else {
-		                hops += coords_pair_dist(master_coord, mirror_coord);
+		                hops = coords_pair_dist(master_coord, mirror_coord);
                 }
                 std::cout << topology_to_str(master_coord) << " to " << topology_to_str(mirror_coord) <<  ": " << hops << " hops\n";
                 hops_sum += hops;
