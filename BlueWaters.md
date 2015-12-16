@@ -17,6 +17,8 @@ export CXX=/opt/gcc/4.9.3/bin/g++
 
 # Change directory to work directory. If you don't have your own work directory, create one as /projects/sciteam/jsb/<your_user_name>
 export PROJECT_HOME=/projects/sciteam/jsb/$USER
+cd $PROJECT_HOME/PowerGraph/release/toolkits/graph_analytics
+
 
 # Create a nodes list file
 cat $HOME/.crayccm/ccm_nodelist.* | sort -u > $PROJECT_HOME/machines
