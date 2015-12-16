@@ -551,7 +551,7 @@ namespace graphlab {
                     // Different procs on same Gemini; Calculate as one hop
                     ++hops;
                 } else {
-		  hops += coords_pair_dist(master_coord, mirror_coord);
+		                hops += coords_pair_dist(master_coord, mirror_coord);
                 }
                 std::cout << topology_to_str(master_coord) << " to " << topology_to_str(mirror_coord) <<  ": " << hops << " hops\n";
                 hops_sum += hops;
