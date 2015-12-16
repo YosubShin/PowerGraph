@@ -28,6 +28,7 @@
 #include <vector>
 #include <map>
 #include <time.h>
+#include <math.h>
 
 #include <graphlab.hpp>
 
@@ -414,14 +415,14 @@ int main(int argc, char** argv) {
     bool topology_aware = dc.topology_aware();
     double num_master2mirror_hops = (double) graph.num_master2mirror_hops() / graph.num_mirrors();
     double average_local_own_nverts = graph.average_num_local_own_vertices();
-    double variance_local_own_nverts = graph.variance_num_local_own_vertices();
+    double stddev_local_own_nverts = sqrt(graph.variance_num_local_own_vertices());
     double average_local_edges = graph.average_num_local_edges();
-    double variance_local_edges = graph.variance_num_local_edges();
+    double stddev_local_edges = sqrt(graph.variance_num_local_edges());
 
     if (!file_exists) {
-      ofs << "algorithm,partitioning_strategy,num_iterations,alpha,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,master2mirror_hops,average_local_own_nverts,variance_local_own_nverts,average_local_edges,variance_local_edges" << std::endl;
+      ofs << "algorithm,partitioning_strategy,num_iterations,alpha,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,master2mirror_hops,average_local_own_nverts,stddev_local_own_nverts,average_local_edges,stddev_local_edges" << std::endl;
     }
-    ofs << "approximate_diameter," << ingress_method << "," << iter << "," << alpha << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << variance_local_own_nverts << "," << average_local_edges << "," << variance_local_edges << std::endl;
+    ofs << "approximate_diameter," << ingress_method << "," << iter << "," << alpha << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << stddev_local_own_nverts << "," << average_local_edges << "," << stddev_local_edges << std::endl;
 
     ofs.close();
   }  

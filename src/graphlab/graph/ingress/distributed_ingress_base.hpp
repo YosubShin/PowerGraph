@@ -33,6 +33,8 @@
 #include <graphlab/macros_def.hpp>
 #include <iostream>
 #include <map>
+#include <math.h>
+
 namespace graphlab {
 
   /**
@@ -684,9 +686,9 @@ namespace graphlab {
                             << "\n\t replication factor: " << (double)graph.nreplicas/graph.num_vertices()
                             << "\n\t number of hops b/w master-mirrors: " << (double)graph.master2mirror_hops / graph.nmirrors
                             << "\n\t average number of local master vertices: " << graph.average_local_own_nverts
-                            << "\n\t variance of number of local master vertices: " << graph.variance_local_own_nverts
+                            << "\n\t std dev of number of local master vertices: " << sqrt(graph.variance_local_own_nverts)
                             << "\n\t average number of local edges: " << graph.average_local_edges
-                            << "\n\t variance of number of local edges: " << graph.variance_local_edges
+                            << "\n\t std dev of number of local edges: " << sqrt(graph.variance_local_edges)
                             << std::endl;
       }
     }
