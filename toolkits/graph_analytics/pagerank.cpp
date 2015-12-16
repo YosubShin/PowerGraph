@@ -378,9 +378,9 @@ int main(int argc, char** argv) {
     double stddev_local_edges = sqrt(graph.variance_num_local_edges());
 
     if (!file_exists) {
-      ofs << "algorithm,partitioning_strategy,num_iterations,alpha,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,topology_weight,master2mirror_hops,average_local_own_nverts,stddev_local_own_nverts,average_local_edges,stddev_local_edges" << std::endl;
+      ofs << "algorithm,partitioning_strategy,num_iterations,alpha,replication_factor,load_time,finalize_time,ingress_time,computation_time,total_time,topology_aware,topology_weight,master2mirror_hops,average_local_own_nverts,stddev_local_own_nverts,average_local_edges,stddev_local_edges,data_size" << std::endl;
     }
-    ofs << "pagerank," << ingress_method << "," << ITERATIONS << "," << alpha << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << topology_weight << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << stddev_local_own_nverts << "," << average_local_edges << "," << stddev_local_edges << std::endl;
+    ofs << "pagerank," << ingress_method << "," << ITERATIONS << "," << alpha << "," << replication_factor << "," << load_time << "," << finalize_time << "," << ingress_time << "," << runtime << "," << (ingress_time + runtime) << "," << topology_aware << "," << topology_weight << "," << num_master2mirror_hops << "," << average_local_own_nverts<< "," << stddev_local_own_nverts << "," << average_local_edges << "," << stddev_local_edges << "," << data_size << std::endl;
 
     ofs.close();
   }
