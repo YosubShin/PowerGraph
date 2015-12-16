@@ -37,6 +37,8 @@ size_t ITERATIONS = 0;
 
 bool USE_DELTA_CACHE = false;
 
+size_t data_size = 0;
+
 struct vdata {
     double first;
     std::vector<uint8_t> second;
@@ -44,36 +46,36 @@ struct vdata {
     vdata() : first(0), second() {}
 
     vdata(double f, const std::vector<uint8_t>& s) : first(f), second() {
-        std::cout << "Begin vdata(double f, const std::vector<uint8_t>& s)\n";
+        ////  std::cout << "Begin vdata(double f, const std::vector<uint8_t>& s)\n";
         for (size_t i = 0; i < s.size(); ++i) {
             second.push_back(s[i]);
         }
-        std::cout << "End vdata(double f, const std::vector<uint8_t>& s)\n";
+        ////  std::cout << "End vdata(double f, const std::vector<uint8_t>& s)\n";
     }
 
     vdata& operator+=(const vdata& other) {
-        std::cout << "Begin operator+=(const vdata& other)\n";
+        ////  std::cout << "Begin operator+=(const vdata& other)\n";
         first += other.first;
         for (size_t i = 0; i < std::min(second.size(), other.second.size()); ++i) {
             second[i] += other.second[i];
         }
-        std::cout << "End operator+=(const vdata& other)\n";
+        ////  std::cout << "End operator+=(const vdata& other)\n";
         return *this;
     }
 
     void save(graphlab::oarchive& oarc) const {
-        std::cout << "Begin save(graphlab::oarchive& oarc)\n";
+        ////  std::cout << "Begin save(graphlab::oarchive& oarc)\n";
         size_t num = second.size();
         oarc << num;
         for (size_t i = 0; i < num; ++i) {
             oarc << second[i];
         }
         oarc << first;
-        std::cout << "End save(graphlab::oarchive& oarc)\n";
+        ////  std::cout << "End save(graphlab::oarchive& oarc)\n";
     }
 
     void load(graphlab::iarchive& iarc) {
-        std::cout << "Begin load(graphlab::iarchive& iarc)\n";
+        ////  std::cout << "Begin load(graphlab::iarchive& iarc)\n";
         second.clear();
         size_t size = 0;
         iarc >> size;
@@ -83,7 +85,7 @@ struct vdata {
             second.push_back(element);
         }
         iarc >> first;
-        std::cout << "End load(graphlab::iarchive& iarc)\n";
+        ////  std::cout << "End load(graphlab::iarchive& iarc)\n";
     }
 };
 
@@ -101,12 +103,12 @@ typedef graphlab::distributed_graph<vertex_data_type, edge_data_type> graph_type
  * to initialize the vertes data.
  */
 void init_vertex(graph_type::vertex_type& vertex) {
-    std::cout << "Begin init_vertex(graph_type::vertex_type& vertex)\n";
+    ////  std::cout << "Begin init_vertex(graph_type::vertex_type& vertex)\n";
     vertex.data().first = 1;
-    for (size_t i = 0; i < 1024; ++i) {
+    for (size_t i = 0; i < data_size; ++i) {
         vertex.data().second.push_back( (uint8_t) (i % 256));
     }
-    std::cout << "End init_vertex(graph_type::vertex_type& vertex)\n";
+    ////  std::cout << "End init_vertex(graph_type::vertex_type& vertex)\n";
 }
 
 /*
@@ -140,7 +142,7 @@ public:
    */
   edge_dir_type gather_edges(icontext_type& context,
                               const vertex_type& vertex) const {
-      std::cout << "Begin gather_edges(icontext_type& context, const vertex_type& vertex) const\n";
+      ////  std::cout << "Begin gather_edges(icontext_type& context, const vertex_type& vertex) const\n";
     return graphlab::IN_EDGES;
   } // end of Gather edges
 
@@ -148,25 +150,25 @@ public:
   /* Gather the weighted rank of the adjacent page   */
     vdata gather(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
-        std::cout << "Begin gather(icontext_type& context, const vertex_type& vertex, edge_type& edge)\n";
+        ////  std::cout << "Begin gather(icontext_type& context, const vertex_type& vertex, edge_type& edge)\n";
         return vdata( (edge.source().data().first / edge.source().num_out_edges()), vertex.data().second);
   }
 
   /* Use the total rank of adjacent pages to update this page */
   void apply(icontext_type& context, vertex_type& vertex,
              const gather_type& total) {
-      std::cout << "Begin apply(icontext_type& context, vertex_type& vertex, const gather_type& total)\n";
+      ////  std::cout << "Begin apply(icontext_type& context, vertex_type& vertex, const gather_type& total)\n";
     const double newval = (1.0 - RESET_PROB) * total.first + RESET_PROB;
     last_change = (newval - vertex.data().first);
     vertex.data().first = newval;
     if (ITERATIONS) context.signal(vertex);
-    std::cout << "End apply(icontext_type& context, vertex_type& vertex, const gather_type& total)\n";
+    ////  std::cout << "End apply(icontext_type& context, vertex_type& vertex, const gather_type& total)\n";
   }
 
   /* The scatter edges depend on whether the pagerank has converged */
   edge_dir_type scatter_edges(icontext_type& context,
                               const vertex_type& vertex) const {
-      std::cout << "Begin scatter_edges(icontext_type& context, const vertex_type& vertex) const\n";
+      ////  std::cout << "Begin scatter_edges(icontext_type& context, const vertex_type& vertex) const\n";
     // If an iteration counter is set then
     if (ITERATIONS) return graphlab::NO_EDGES;
     // In the dynamic case we run scatter on out edges if the we need
@@ -181,7 +183,7 @@ public:
   /* The scatter function just signal adjacent pages */
   void scatter(icontext_type& context, const vertex_type& vertex,
                edge_type& edge) const {
-      std::cout << "Begin scatter(icontext_type& context, const vertex_type& vertex, edge_type& edge) const\n";
+      ////  std::cout << "Begin scatter(icontext_type& context, const vertex_type& vertex, edge_type& edge) const\n";
     if(USE_DELTA_CACHE) {
         context.post_delta(edge.target(), vdata(last_change, vertex.data().second));
     }
@@ -191,7 +193,7 @@ public:
     } else {
       context.signal(edge.target()); //, std::fabs(last_change));
     }
-    std::cout << "End scatter(icontext_type& context, const vertex_type& vertex, edge_type& edge) const\n";
+    ////  std::cout << "End scatter(icontext_type& context, const vertex_type& vertex, edge_type& edge) const\n";
   }
 
   // void save(graphlab::oarchive& oarc) const {
@@ -275,6 +277,9 @@ int main(int argc, char** argv) {
                        "If set, will save the resultant pagerank to a "
                        "sequence of files with prefix saveprefix");
 
+  clopts.attach_option("data_size", data_size,
+                       "Artificially inject data to pagerank vertices.");
+
   if(!clopts.parse(argc, argv)) {
     dc.cout() << "Error in parsing command line arguments." << std::endl;
     return EXIT_FAILURE;
@@ -337,8 +342,6 @@ int main(int argc, char** argv) {
 
   const double total_rank = graph.map_reduce_vertices<double>(map_rank);
   std::cout << "Total rank: " << total_rank << std::endl;
-
-  const double replication_factor = (double)graph.num_replicas()/graph.num_vertices();
 
   // Save the final graph -----------------------------------------------------
   if (saveprefix != "") {
