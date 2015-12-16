@@ -26,20 +26,24 @@
 #include <graphlab/graph/graph_basic_types.hpp>
 #include <graphlab/graph/graph_hash.hpp>
 #include <graphlab/rpc/distributed_event_log.hpp>
+#include <graphlab/rpc/dc.hpp>
 #include <graphlab/util/dense_bitset.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+#include <iostream>
 
 namespace graphlab {
   template<typename VertexData, typename EdgeData>
   class distributed_graph;
 
   static size_t coords_pair_dist(const uint16_t& src, const uint16_t& dst) {
+    std::cout << "coords_pair_dist:" << topology_to_str(src) << " to " << topology_to_str(dst) << std::endl;
     size_t dist = 0;
     for (size_t j = 0; j < 3; ++j) {
     	size_t src_val = (src >> (10 - 5 * j)) & 0x1F;
     	size_t dst_val = (dst >> (10 - 5 * j)) & 0x1F;
-    	size_t abs = std::abs(src_val - dst_val);
-    	dist += std::min(abs, 23 - abs);
+    	size_t absval = std::abs(src_val - dst_val);
+    	dist += std::min(absval, 23 - absval);
+      std::cout << "j=" << j << ", src_val=" << src_val << ", dst_val=" << dst_val << ", absval=" << absval << ", dist=" << dist << std::endl;
     }
     return dist;
   }
