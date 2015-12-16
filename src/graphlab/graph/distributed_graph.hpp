@@ -3172,7 +3172,7 @@ namespace graphlab {
     /** The number of vertices owned by this proc */
     size_t local_own_nverts;
 
-    size_t local_own_nverts_mirrors;
+    size_t local_own_verts_mirrors;
 
     size_t nmirrors;
 
