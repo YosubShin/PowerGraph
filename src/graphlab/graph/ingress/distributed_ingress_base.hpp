@@ -30,6 +30,7 @@
 #include <graphlab/util/memory_info.hpp>
 #include <graphlab/util/hopscotch_map.hpp>
 #include <graphlab/rpc/buffered_exchange.hpp>
+#include <graphlab/rpc/dc.hpp>
 #include <graphlab/macros_def.hpp>
 #include <iostream>
 #include <map>
@@ -601,13 +602,12 @@ namespace graphlab {
                 } else {
 		  hops += coords_pair_dist(master_coord, mirror_coord);
                 }
-              std::cout << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << ") to ";
-              std::cout << "(" << mirror_coord[0] << "," << mirror_coord[1] << "," << mirror_coord[2] << "): " << hops << " hops\n";
+                std::cout << topology_to_str(master_coord) << " to " << topology_to_str(mirror_coord) <<  ": " << hops << " hops\n";
                 hops_sum += hops;
                 graph.local_own_verts_mirrors += 1;
             }
             graph.local_master2mirror_hops += hops_sum;
-          std::cout << "vid" << record.gvid << " with master " << record.owner << "(" << master_coord[0] << "," << master_coord[1] << "," << master_coord[2] << "): total hops: " << hops_sum << std::endl;
+            std::cout << "vid" << record.gvid << " with master " << record.owner << topology_to_str(master_coord) << ": total hops: " << hops_sum << std::endl;
         }
       }
 

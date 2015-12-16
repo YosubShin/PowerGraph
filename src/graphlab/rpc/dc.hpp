@@ -57,6 +57,8 @@
 
 namespace graphlab {
 
+std::string topology_to_str(const uint64_t& topology);
+
 /**
  *  \ingroup rpc
  *  \brief Distributed control constructor parameters.
