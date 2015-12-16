@@ -35,7 +35,11 @@ cd release/toolkits/graph_analytics
 make approximate_diameter -j16
 
 # Use a synthetic power law graph
+# For Approximate Diameter
 python $PROJECT_HOME/PowerGraph/rpcexec.py -n 64 -f $PROJECT_HOME/machines $PROJECT_HOME/PowerGraph/release/toolkits/graph_analytics/approximate_diameter --powerlaw=5000000 --alpha=2.1 --indegree=1 --tol=10.0 --graph_opts="ingress=oblivious"
+
+# For PageRank
+python $PROJECT_HOME/PowerGraph/rpcexec.py -n 64 -t 0.1 -f $PROJECT_HOME/machines $PROJECT_HOME/PowerGraph/release/toolkits/graph_analytics/pagerank --powerlaw=50 --alpha=2.1 --indegree=1 --data_size=128 --graph_opts="ingress=oblivious"
 
 # Or use a real graph file
 python $PROJECT_HOME/PowerGraph/rpcexec.py -n 2 -f $PROJECT_HOME/machines $PROJECT_HOME/PowerGraph/release/toolkits/graph_analytics/pagerank --graph=$PROJECT_HOME/graphs/livejournal/  --format=snap --iterations=2 --graph_opts="ingress=random"
