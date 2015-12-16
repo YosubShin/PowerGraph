@@ -220,9 +220,9 @@ namespace graphlab {
           ASSERT_NE(min_hops_sum, 1000000);
           ASSERT_FALSE(centroid_procs.empty());
 
-        std::cout << "Calculated centroid:" << centroid_proc << " (" << topologies[centroid_proc][0] << "," << topologies[centroid_proc][1] << ","<< topologies[centroid_proc][2] << ") for mirrors";
+        std::cout << "Calculated centroid:" << centroid_proc << topology_to_str(topologies[centroid_proc]) << " for mirrors";
           foreach(const procid_t& mirror, mirrors) {
-            std::cout << "(" << topologies[mirror][0] << "," << topologies[mirror][1] << "," << topologies[mirror][2] << "), ";
+            std::cout << topology_to_str(topologies[mirror]) << ", ";
           }
 
 
