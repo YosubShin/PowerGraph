@@ -397,7 +397,7 @@ int main(int argc, char** argv) {
   if (dc.procid() == 0) {
     char* username = getenv("USER");
     std::string username_str = username;
-    const std::string output_filename = "/projects/sciteam/jsb/" + username + "/output.csv";
+    const std::string output_filename = "/projects/sciteam/jsb/" + username_str + "/output.csv";
     bool file_exists = boost::filesystem::exists(output_filename);
 
     std::ofstream ofs;
