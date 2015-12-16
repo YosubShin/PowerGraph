@@ -181,55 +181,6 @@ namespace graphlab {
       vertex_combine_strategy = combine_strategy;
     }
 
-      procid_t calculate_centroid_proc(vertex_id_type vid, const mirror_type& mirrors) {
-          std::vector<procid_t> centroid_procs;
-
-          // Look for cached proc_id
-          if (mirrors2centroid_procs.find(mirrors) != mirrors2centroid_procs.end()) {
-              centroid_procs =  mirrors2centroid_procs[mirrors];
-              return centroid_procs[graph_hash::hash_vertex(vid) % centroid_procs.size()];
-          }
-
-          std::vector<std::vector<int> > topologies = rpc.dc().topologies();
-          int min_hops_sum = 1000000;
-
-          for (size_t i = 0; i < topologies.size(); ++i) {
-              std::vector<int> candidate_centroid = topologies[i];
-              int hops_sum = 0;
-              foreach(const procid_t& j, mirrors) {
-                  if (i == j) {
-                      continue;
-                  }
-                  std::vector<int> compared_position = topologies[j];
-                  ASSERT_EQ(candidate_centroid.size(), 3);
-                  ASSERT_EQ(compared_position.size(), 3);
-                  for (size_t k = 0; k < candidate_centroid.size(); ++k) {
-                      int dist = abs(candidate_centroid[k] - compared_position[k]);
-                      hops_sum += std::min(dist, 23 - dist);
-                  }
-              }
-
-              if (hops_sum < min_hops_sum) {
-                  min_hops_sum = hops_sum;
-                  centroid_procs.clear();
-                  centroid_procs.push_back(i);
-              } else if (hops_sum == min_hops_sum) {
-                  centroid_procs.push_back(i);
-              }
-          }
-          ASSERT_NE(min_hops_sum, 1000000);
-          ASSERT_FALSE(centroid_procs.empty());
-
-        std::cout << "Calculated centroid:" << centroid_proc << topology_to_str(topologies[centroid_proc]) << " for mirrors";
-          foreach(const procid_t& mirror, mirrors) {
-            std::cout << topology_to_str(topologies[mirror]) << ", ";
-          }
-
-
-          mirrors2centroid_procs[mirrors] = centroid_procs;
-          return centroid_procs[graph_hash::hash_vertex(vid) % centroid_procs.size()];
-      }
-
       /** \brief Finalize completes the local graph data structure
        * and the vertex record information.
        *
