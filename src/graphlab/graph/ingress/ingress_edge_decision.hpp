@@ -221,7 +221,7 @@ namespace graphlab {
           const vertex_id_type target,
           bin_counts_type& src_degree,
           bin_counts_type& dst_degree,
-          std::vector<procid_t>& candidates,
+          const std::vector<procid_t>& candidates,
           std::vector<size_t>& proc_num_edges,
           bool usehash = false,
           bool userecent = false
@@ -276,7 +276,7 @@ namespace graphlab {
           const vertex_id_type target,
           bin_counts_type& src_degree,
           bin_counts_type& dst_degree,
-          std::vector<procid_t>& candidates,
+          const std::vector<procid_t>& candidates,
           std::vector<size_t>& proc_num_edges,
           bool usehash = false,
           bool userecent = false
