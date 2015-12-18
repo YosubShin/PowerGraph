@@ -82,6 +82,7 @@
 
 #include <graphlab/graph/ingress/sharding_constraint.hpp>
 #include <graphlab/graph/ingress/distributed_constrained_random_ingress.hpp>
+#include <graphlab/graph/ingress/distributed_constrained_oblivious_ingress.hpp>
 
 #include <graphlab/graph/graph_hash.hpp>
 
