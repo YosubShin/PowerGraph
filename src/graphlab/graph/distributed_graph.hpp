@@ -3213,6 +3213,10 @@ namespace graphlab {
         if (rpc.procid() == 0) logstream(LOG_EMPH) << "Use oblivious ingress, usehash: " << usehash
           << ", userecent: " << userecent << std::endl;
         ingress_ptr = new distributed_oblivious_ingress<VertexData, EdgeData>(rpc.dc(), *this, usehash, userecent);
+      } else if (method == "grid-oblivious") {
+        if (rpc.procid() == 0) logstream(LOG_EMPH) << "Use grid-oblivious ingress, usehash: " << usehash
+          << ", userecent: " << userecent << std::endl;
+        ingress_ptr = new distributed_constrained_oblivious_ingress<VertexData, EdgeData>(rpc.dc(), *this, usehash, userecent);
       } else if (method == "hdrf") {
         if (rpc.procid() == 0) logstream(LOG_EMPH) << "Use hdrf oblivious ingress, usehash: " << usehash
           << ", userecent: " << userecent << std::endl;

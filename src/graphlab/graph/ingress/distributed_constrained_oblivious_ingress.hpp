@@ -66,6 +66,7 @@ namespace graphlab {
 
     /** Array of number of edges on each proc. */
     std::vector<size_t> proc_num_edges;
+    simple_spinlock obliv_lock;
 
     /** Ingress tratis. */
     bool usehash;
@@ -88,11 +89,19 @@ namespace graphlab {
     /** Add an edge to the ingress object using oblivious greedy assignment. */
     void add_edge(vertex_id_type source, vertex_id_type target,
                   const EdgeData& edata) {
-      dht[source]; dht[target];
       const std::vector<procid_t>& candidates = 
         constraint->get_joint_neighbors(get_master(source), get_master(target));
-      const procid_t owning_proc = 
-        base_type::edge_decision.edge_to_proc_greedy(source, target, dht[source], dht[target], candidates, proc_num_edges, usehash, userecent);
+      obliv_lock.lock();
+      dht[source]; dht[target];
+      procid_t owning_proc;
+      if (!dc_.topology_aware()) {
+	owning_proc = base_type::edge_decision.edge_to_proc_greedy(source, target, dht[source], dht[target], candidates, proc_num_edges, usehash, userecent);  
+      } else {
+	owning_proc = base_type::edge_decision.edge_to_proc_greedy_and_topology(source, target, dht[source], dht[target], candidates, proc_num_edges, usehash, userecent);
+      }
+
+      obliv_lock.unlock();
+
       typedef typename base_type::edge_buffer_record edge_buffer_record;
       edge_buffer_record record(source, target, edata);
       base_type::edge_exchange.send(owning_proc, record);
