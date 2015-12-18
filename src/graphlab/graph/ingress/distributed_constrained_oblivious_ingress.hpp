@@ -74,10 +74,13 @@ namespace graphlab {
     sharding_constraint* constraint;
     boost::hash<vertex_id_type> hashvid;
 
+  private:
+    distributed_control& dc_;
+
   public:
     distributed_constrained_oblivious_ingress(distributed_control& dc, graph_type& graph, bool usehash = false, bool userecent = false) :
       base_type(dc, graph),
-      dht(-1),proc_num_edges(dc.numprocs()), usehash(usehash), userecent(userecent) { 
+      dht(-1),proc_num_edges(dc.numprocs()), usehash(usehash), userecent(userecent), dc_(dc) { 
         constraint = new sharding_constraint(dc.numprocs(), "grid"); 
      }
 
