@@ -217,7 +217,7 @@ namespace graphlab {
        *  bitset<MAX_MACHINE> dst_degree : the degree presence of target over machines
        *  vector<size_t>      proc_num_edges : the edge counts over machines
        * */
-      procid_t edge_to_proc_greedy (const vertex_id_type source, 
+      procid_t edge_to_proc_greedy_candidates (const vertex_id_type source, 
           const vertex_id_type target,
           bin_counts_type& src_degree,
           bin_counts_type& dst_degree,
@@ -272,7 +272,7 @@ namespace graphlab {
        *  bitset<MAX_MACHINE> dst_degree : the degree presence of target over machines
        *  vector<size_t>      proc_num_edges : the edge counts over machines
        * */
-      procid_t edge_to_proc_greedy_and_topology (const vertex_id_type source, 
+      procid_t edge_to_proc_greedy_candidates_and_topology (const vertex_id_type source, 
           const vertex_id_type target,
           bin_counts_type& src_degree,
           bin_counts_type& dst_degree,
