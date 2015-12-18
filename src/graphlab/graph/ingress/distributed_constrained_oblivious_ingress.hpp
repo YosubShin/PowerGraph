@@ -91,7 +91,7 @@ namespace graphlab {
     /** Add an edge to the ingress object using oblivious greedy assignment. */
     void add_edge(vertex_id_type source, vertex_id_type target,
                   const EdgeData& edata) {
-      const std::vector<procid_t>& candidates = 
+      std::vector<procid_t>& candidates = 
         constraint->get_joint_neighbors(get_master(source), get_master(target));
       obliv_lock.lock();
       dht[source]; dht[target];
